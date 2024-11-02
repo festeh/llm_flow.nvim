@@ -8,8 +8,10 @@ function M.ensure_directory_exists(path)
             vim.notify('Failed to create directory: ' .. path, vim.log.levels.ERROR)
             return false
         end
-        return false
+        -- Directory was created successfully
+        return true
     end
+    -- Directory already exists
     return true
 end
 
