@@ -1,4 +1,4 @@
-local utils = require('llm_flow.utils')
+local utils = require('lua.llm_flow.utils')
 
 local M = {}
 
