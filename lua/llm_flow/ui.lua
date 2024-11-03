@@ -5,12 +5,10 @@ local M = {}
 -- @param pos: 0-based column position
 -- @param text: string to display as virtual text
 function M.set_text(line, pos, text)
+  pos = pos + 1
   local bufnr = vim.api.nvim_get_current_buf()
   local ns_id = vim.api.nvim_create_namespace('llm_flow')
-  
-  -- Save cursor position
-  local cursor_pos = vim.api.nvim_win_get_cursor(0)
-  
+
   -- Clear any existing virtual text in this namespace
   vim.api.nvim_buf_clear_namespace(bufnr, ns_id, 0, -1)
 
@@ -36,9 +34,6 @@ function M.set_text(line, pos, text)
       hl_mode = 'combine',
     })
   end
-  
-  -- Restore cursor position
-  vim.api.nvim_win_set_cursor(0, cursor_pos)
 end
 
 function M.example()
