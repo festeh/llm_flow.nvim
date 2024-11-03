@@ -10,28 +10,29 @@ function M.set_text(line, pos, text)
   local lines = vim.split(text, '\n', { plain = true })
   local bufnr = vim.api.nvim_get_current_buf()
   local buffer_line_count = vim.api.nvim_buf_line_count(bufnr)
-  for i, line_text in ipairs(lines) do
-    local line_num = line + i - 1
-    if line_num >= buffer_line_count then
-      break
+  if line >= buffer_line_count then
+    return
+  end
+
+  local ns_id = vim.api.nvim_create_namespace('llm_flow')
+  
+  -- Set first line as inline virtual text
+  vim.api.nvim_buf_set_extmark(bufnr, ns_id, line, pos, {
+    virt_text = { { lines[1], 'Comment' } },
+    virt_text_pos = 'inline',
+    hl_mode = 'combine',
+  })
+
+  -- If there are additional lines, add them as virtual lines after the first line
+  if #lines > 1 then
+    local virt_lines = {}
+    for i = 2, #lines do
+      table.insert(virt_lines, { { lines[i], 'Comment' } })
     end
-    local ns_id = vim.api.nvim_create_namespace('llm_flow')
-    if i == 1 then
-      -- First line is inline virtual text
-      vim.api.nvim_buf_set_extmark(bufnr, ns_id, line_num, pos, {
-        virt_text = { { line_text, 'Comment' } },
-        virt_text_pos = 'inline',
-        hl_mode = 'combine',
-      })
-    else
-      -- Subsequent lines are shown as virtual text on new lines
-      vim.api.nvim_buf_set_extmark(bufnr, ns_id, line_num - 1, 0, {
-        virt_text = { { line_text, 'Comment' } },
-        virt_text_pos = 'eol',
-        virt_lines = { { { line_text, 'Comment' } } },
-        hl_mode = 'combine',
-      })
-    end
+    vim.api.nvim_buf_set_extmark(bufnr, ns_id, line, 0, {
+      virt_lines = virt_lines,
+      hl_mode = 'combine',
+    })
   end
 end
 
