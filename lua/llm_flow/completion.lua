@@ -100,7 +100,6 @@ function M.setup()
         M.timer:close()
         M.timer = nil
       end
-      -- Execute immediately for InsertEnter
       timed_request()
     end,
   })
@@ -115,7 +114,6 @@ function M.setup()
         M.timer = nil
       end
 
-      -- Create new timer with debounce for TextChangedI
       M.timer = uv.new_timer()
       M.timer:start(250, 0, timed_request)
     end,
