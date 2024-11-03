@@ -31,13 +31,37 @@ function M.predict_editor(params, model)
     line = cursor[1] - 1, -- Convert from 1-based to 0-based line number
     pos = cursor[2],
   })
-  client.request("predict_editor", request_params, function(err, result)
+  local status, req_id = client.request("predict_editor", request_params, function(err, result)
     if err then
       vim.notify("Prediction failed: " .. err.message, vim.log.levels.ERROR)
       return
     end
+    print("RES", result)
     return result
   end)
+  print(status, req_id)
+  print(vim.inspect(client.requests))
+  -- vim.api.nvim_create_autocmd('LspRequest', {
+  --   callback = function(args)
+  --     vim.notify("kek")
+  --     local bufnr = args.buf
+  --     local client_id = args.data.client_id
+  --     local request_id = args.data.request_id
+  --     local request = args.data.request
+  --     if request.type == 'pending' then
+  --       -- do something with pending requests
+  --       -- track_pending(client_id, bufnr, request_id, request)
+  --       print("got pending req")
+  --       print(vim.inspect(request))
+  --     elseif request.type == 'cancel' then
+  --       print("cancelled")
+  --       -- do something with pending cancel requests
+  --       -- track_canceling(client_id, bufnr, request_id, request)
+  --     elseif request.type == 'complete' then
+  --       print("completed")
+  --     end
+  --   end,
+  -- })
 end
 
 return M
