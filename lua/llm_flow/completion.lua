@@ -19,6 +19,35 @@ function M.find_lsp_client()
   return nil
 end
 
+local function on_predict_complete(err, result)
+  if err then
+    vim.notify("Prediction failed: " .. err.message, vim.log.levels.ERROR)
+    return
+  end
+  if result.id ~= M.req_id then
+    print("cancelled", result.id, M.req_id)
+    return
+  end
+  local content = result.content
+  local content_lines = vim.split(content, "\n", { plain = true })
+  local truncated_content = { content_lines[1] }
+  local bufnr = vim.api.nvim_get_current_buf()
+  local buffer_lines = vim.api.nvim_buf_get_lines(bufnr, M.line, M.line + #content_lines, false)
+  for i = 2, #content_lines do
+    local trimmed_content = vim.trim(content_lines[i] or "")
+    local trimmed_buffer = vim.trim(buffer_lines[i] or "")
+    print(i, "|", trimmed_content, "|, |", trimmed_buffer, "|")
+
+    if trimmed_content == trimmed_buffer then
+      break
+    end
+    table.insert(truncated_content, content_lines[i])
+  end
+  local final_content = table.concat(truncated_content, "\n")
+  ui.set_text(M.line, M.pos, final_content)
+  return result
+end
+
 --- Send a prediction request using the specified model
 --- @param params table The parameters for the prediction
 function M.predict_editor(params)
@@ -31,42 +60,20 @@ function M.predict_editor(params)
   params = params or {}
   local bufnr = vim.api.nvim_get_current_buf()
   local cursor = vim.api.nvim_win_get_cursor(0)
-  local uri = vim.uri_from_bufnr(bufnr)
 
+  local line = cursor[1] - 1
+  local pos = cursor[2]
+
+  M.line = line
+  M.pos = pos
 
   local request_params = vim.tbl_extend("force", params, {
     providerAndModel = "codestral/codestral-latest",
-    uri = uri,
-    line = cursor[1] - 1, -- Convert from 1-based to 0-based line number
-    pos = cursor[2],
+    uri = vim.uri_from_bufnr(bufnr),
+    line = line,
+    pos = pos
   })
-  local status, req_id = client.request("predict_editor", request_params, function(err, result)
-    if err then
-      vim.notify("Prediction failed: " .. err.message, vim.log.levels.ERROR)
-      return
-    end
-    if result.id ~= M.req_id then
-      print("cancelled", result.id, M.req_id)
-      return
-    end
-    local content = result.content
-    local content_lines = vim.split(content, "\n", { plain = true })
-    local truncated_content = { content_lines[1] }
-    local bufnr = vim.api.nvim_get_current_buf()
-    local buffer_lines = vim.api.nvim_buf_get_lines(bufnr, cursor[1] - 1, cursor[1] + #content_lines - 1, false)
-    for i = 2, #content_lines do
-      local trimmed_content = vim.trim(content_lines[i] or "")
-      local trimmed_buffer = vim.trim(buffer_lines[i] or "")
-      print(i, trimmed_content, trimmed_buffer)
-      if trimmed_content == trimmed_buffer then
-        break
-      end
-      table.insert(truncated_content, content_lines[i])
-    end
-    local final_content = table.concat(truncated_content, "\n")
-    ui.set_text(cursor[1] - 1, cursor[2], final_content)
-    return result
-  end)
+  local status, req_id = client.request("predict_editor", request_params, on_predict_complete)
   M.req_id = req_id
 end
 
@@ -110,17 +117,12 @@ function M.setup()
 end
 
 function M.desetup()
-  -- Clear any existing timer
   if M.timer then
     M.timer:stop()
     M.timer:close()
     M.timer = nil
   end
-  
-  -- Clear the autocommands by deleting the group
   pcall(vim.api.nvim_del_augroup_by_name, 'LLMFlow')
-  
-  -- Clear any remaining virtual text
   ui.clear()
 end
 

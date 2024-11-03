@@ -5,29 +5,18 @@ local M = {}
 -- @param pos: 0-based column position
 -- @param text: string to display as virtual text
 function M.set_text(line, pos, text)
-  pos = pos + 1
-  local bufnr = vim.api.nvim_get_current_buf()
-  local ns_id = vim.api.nvim_create_namespace('llm_flow')
+  M.clear()
 
-  -- Clear any existing virtual text in this namespace
-  vim.api.nvim_buf_clear_namespace(bufnr, ns_id, 0, -1)
-
-  -- Split text into lines
   local lines = vim.split(text, '\n', { plain = true })
-
-  -- Create virtual text for each line
+  local bufnr = vim.api.nvim_get_current_buf()
   local buffer_line_count = vim.api.nvim_buf_line_count(bufnr)
-
   for i, line_text in ipairs(lines) do
     local line_num = line + i - 1
-
-    -- Skip if line number would be out of buffer bounds
     if line_num >= buffer_line_count then
       break
     end
-
     local col_pos = (i == 1) and pos or 0 -- Use pos for first line, 0 for others
-
+    local ns_id = vim.api.nvim_create_namespace('llm_flow')
     vim.api.nvim_buf_set_extmark(bufnr, ns_id, line_num, col_pos, {
       virt_text = { { line_text, 'Comment' } },
       virt_text_pos = 'inline',

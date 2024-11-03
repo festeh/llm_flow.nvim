@@ -1,14 +1,13 @@
+ 
 #include <stdio.h>
 int main() {
-    double aaa, baab, product;
-    printf("Enter two numbers: ");
-    scanf("%lf %lf", &aaa, &baab);  
- 
-    // Calculating product
-    product = aaa * baab;
+    int ;
+    printf("Enter an integer: ");
+    scanf("%d", &num);
 
-    // %.2lf displays number up to 2 decimal point
-    printf("Product = %.2lf", product);
+    // true if num is perfectly divisible by 2
+    if(num % 2 == 0)
+        
     
     return 0;
 }
