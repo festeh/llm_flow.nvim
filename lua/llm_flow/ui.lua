@@ -15,13 +15,18 @@ function M.set_text(line, pos, text)
     if line_num >= buffer_line_count then
       break
     end
-    local col_pos = (i == 1) and pos or 0 -- Use pos for first line, 0 for others
     local ns_id = vim.api.nvim_create_namespace('llm_flow')
-    vim.api.nvim_buf_set_extmark(bufnr, ns_id, line_num, col_pos, {
-      virt_text = { { line_text, 'Comment' } },
-      virt_text_pos = 'inline',
-      hl_mode = 'combine',
-    })
+    if i == 1 then
+      -- First line is inline virtual text
+      vim.api.nvim_buf_set_extmark(bufnr, ns_id, line_num, pos, {
+        virt_text = { { line_text, 'Comment' } },
+        virt_text_pos = 'inline',
+        hl_mode = 'combine',
+      })
+    else
+      -- Subsequent lines are inserted as new lines
+      vim.api.nvim_buf_set_lines(bufnr, line_num, line_num, false, { line_text })
+    end
   end
 end
 
