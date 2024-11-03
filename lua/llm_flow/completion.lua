@@ -44,8 +44,26 @@ function M.predict_editor(params, model)
       return
     end
     local content = result.content
-    print("content:", content)
-    ui.set_text(cursor[1] - 1, cursor[2], content)
+    -- Split content into lines
+    local content_lines = vim.split(content, "\n", { plain = true })
+    -- Always keep first line
+    local truncated_content = {content_lines[1]}
+    
+    -- Get current buffer lines
+    local bufnr = vim.api.nvim_get_current_buf()
+    local buffer_lines = vim.api.nvim_buf_get_lines(bufnr, cursor[1] - 1, cursor[1] + #content_lines - 1, false)
+    
+    -- Compare subsequent lines
+    for i = 2, #content_lines do
+        if content_lines[i] == buffer_lines[i] then
+            break
+        end
+        table.insert(truncated_content, content_lines[i])
+    end
+    
+    -- Join truncated content back together
+    local final_content = table.concat(truncated_content, "\n")
+    ui.set_text(cursor[1] - 1, cursor[2], final_content)
     return result
   end)
 end
