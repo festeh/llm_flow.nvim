@@ -91,18 +91,31 @@ end
 function M.setup()
   local group = vim.api.nvim_create_augroup('LLMFlow', { clear = true })
 
-  -- Create autocommands for insert mode events
-  vim.api.nvim_create_autocmd({ 'InsertEnter', 'TextChangedI' }, {
+  -- Create separate autocommands for insert mode events
+  vim.api.nvim_create_autocmd('InsertEnter', {
+    group = group,
+    callback = function()
+      if M.timer then
+        M.timer:stop()
+        M.timer:close()
+        M.timer = nil
+      end
+      -- Execute immediately for InsertEnter
+      timed_request()
+    end,
+  })
+
+  vim.api.nvim_create_autocmd('TextChangedI', {
     group = group,
     callback = function()
       -- Cancel existing timer if any
       if M.timer then
         M.timer:stop()
         M.timer:close()
-        return
+        M.timer = nil
       end
 
-      -- Create new timer for debouncing
+      -- Create new timer with debounce for TextChangedI
       M.timer = uv.new_timer()
       M.timer:start(250, 0, timed_request)
     end,
