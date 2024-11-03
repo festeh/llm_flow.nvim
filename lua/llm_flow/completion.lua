@@ -21,11 +21,15 @@ function M.predict_editor(params, model)
   end
 
   params = params or {}
+  local bufnr = vim.api.nvim_get_current_buf()
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local uri = vim.uri_from_bufnr(bufnr)
+  
   local request_params = vim.tbl_extend("force", params, {
     providerAndModel = "codestral/codestral-latest",
-    uri = "aaaa",
-    line = 0,
-    pos = 10,
+    uri = uri,
+    line = cursor[1] - 1,  -- Convert from 1-based to 0-based line number
+    pos = cursor[2],
   })
   client.request("predict_editor", request_params, function(err, result)
     if err then
