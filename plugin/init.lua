@@ -34,14 +34,40 @@ vim.api.nvim_create_user_command('LLMRun', function(opts)
     return
   end
 
-  local ok, output = pcall(func)
+  -- Capture both return value and printed output
+  local output = ""
+  local function capture_print(...)
+    local args = {...}
+    local str = ""
+    for i, v in ipairs(args) do
+      if i > 1 then str = str .. "\t" end
+      str = str .. tostring(v)
+    end
+    output = output .. str .. "\n"
+  end
+
+  -- Replace print with our capturing function
+  local old_print = print
+  print = capture_print
+
+  local ok, result = pcall(func)
+  
+  -- Restore original print
+  print = old_print
+
   if not ok then
-    print("Error calling function:", output)
+    print("Error calling function:", result)
     return
   end
 
+  -- Combine captured output with result if any
+  local display_text = output
+  if result then
+    display_text = display_text .. vim.inspect(result)
+  end
+
   -- Display the result in a floating window
-  local lines = vim.split(output, '\n')
+  local lines = vim.split(display_text, '\n')
   local buf = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
 
