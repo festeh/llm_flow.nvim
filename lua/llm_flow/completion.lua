@@ -1,4 +1,5 @@
 local ui = require("llm_flow.ui")
+local uv = vim.uv
 
 local M = {
   line = nil,
@@ -20,8 +21,7 @@ end
 
 --- Send a prediction request using the specified model
 --- @param params table The parameters for the prediction
---- @param model string The model to use for prediction
-function M.predict_editor(params, model)
+function M.predict_editor(params)
   local client = M.find_lsp_client()
   if not client then
     vim.notify("No llm-flow LSP client found", vim.log.levels.ERROR)
@@ -32,6 +32,7 @@ function M.predict_editor(params, model)
   local bufnr = vim.api.nvim_get_current_buf()
   local cursor = vim.api.nvim_win_get_cursor(0)
   local uri = vim.uri_from_bufnr(bufnr)
+
 
   local request_params = vim.tbl_extend("force", params, {
     providerAndModel = "codestral/codestral-latest",
@@ -71,9 +72,9 @@ end
 
 function M.setup()
   local group = vim.api.nvim_create_augroup('LLMFlow', { clear = true })
-  
+
   -- Create autocommands for insert mode events
-  vim.api.nvim_create_autocmd({ 'InsertEnter', 'InsertCharPre' }, {
+  vim.api.nvim_create_autocmd({ 'InsertEnter', 'TextChangedI' }, {
     group = group,
     callback = function()
       -- Cancel existing timer if any
@@ -81,9 +82,9 @@ function M.setup()
         M.timer:stop()
         M.timer:close()
       end
-      
+
       -- Create new timer for debouncing
-      M.timer = vim.loop.new_timer()
+      M.timer = uv.new_timer()
       M.timer:start(50, 0, vim.schedule_wrap(function()
         M.predict_editor()
         -- Clean up timer
@@ -103,7 +104,7 @@ function M.setup()
         M.timer:close()
         M.timer = nil
       end
-      ui.clear_text()
+      ui.clear()
     end,
   })
 end
