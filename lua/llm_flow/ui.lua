@@ -24,8 +24,13 @@ function M.set_text(line, pos, text)
         hl_mode = 'combine',
       })
     else
-      -- Subsequent lines are inserted as new lines
-      vim.api.nvim_buf_set_lines(bufnr, line_num, line_num, false, { line_text })
+      -- Subsequent lines are shown as virtual text on new lines
+      vim.api.nvim_buf_set_extmark(bufnr, ns_id, line_num - 1, 0, {
+        virt_text = { { line_text, 'Comment' } },
+        virt_text_pos = 'eol',
+        virt_lines = { { { line_text, 'Comment' } } },
+        hl_mode = 'combine',
+      })
     end
   end
 end
