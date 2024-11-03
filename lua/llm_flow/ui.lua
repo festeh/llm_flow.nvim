@@ -13,12 +13,12 @@ function M.set_text(line, pos, text)
 
   -- Split text into lines
   local lines = vim.split(text, '\n', { plain = true })
-  
+
   -- Create virtual text for each line
   for i, line_text in ipairs(lines) do
     local line_num = line + i - 1
-    local col_pos = (i == 1) and pos or 0  -- Use pos for first line, 0 for others
-    
+    local col_pos = (i == 1) and pos or 0 -- Use pos for first line, 0 for others
+
     vim.api.nvim_buf_set_extmark(bufnr, ns_id, line_num, col_pos, {
       virt_text = { { line_text, 'Comment' } },
       virt_text_pos = 'inline',
