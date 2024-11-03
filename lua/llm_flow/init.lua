@@ -4,6 +4,8 @@ local api = vim.api
 
 local M = {}
 
+
+
 local function ensure_install()
   local data_path = vim.fn.stdpath('data')
   local llm_flow_path = data_path .. '/llm_flow'
@@ -29,6 +31,8 @@ local function ensure_install()
     vim.notify('Successfully built lsp-server executable', vim.log.levels.INFO)
   end
 end
+
+
 
 M.setup = function()
   ensure_install()

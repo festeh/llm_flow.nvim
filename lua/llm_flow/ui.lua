@@ -1,5 +1,7 @@
 local M = {}
 
+
+
 -- Creates virtual (ghost) text at the specified position
 -- @param line: 0-based line number
 -- @param pos: 0-based column position

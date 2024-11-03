@@ -10,17 +10,26 @@ local M = {
 }
 
 local function stop_timer()
-  stop_timer()
+  if M.timer then
+    M.timer:stop()
+    M.timer:close()
+    M.timer = nil
+  end
 end
 
 function M.find_lsp_client()
   local clients = vim.lsp.get_clients({ bufnr = 0 })
+  local found = nil
   for _, client in pairs(clients) do
     if client.name == "llm-flow" then
-      return client
+      found = client
     end
+    print(client.name)
+    print(vim.inspect(client))
+    print("------------------------------")
+    print()
   end
-  return nil
+  return found
 end
 
 local function on_predict_complete(err, result)
@@ -52,14 +61,21 @@ local function on_predict_complete(err, result)
   return result
 end
 
+
+
+
 --- Send a prediction request using the specified model
 --- @param params table The parameters for the prediction
 function M.predict_editor(params)
   local client = M.find_lsp_client()
+
   if not client then
     vim.notify("No llm-flow LSP client found", vim.log.levels.ERROR)
     return
   end
+
+  print(client.name)
+  print(vim.inspect(client.server_capabilities))
 
   params = params or {}
   local bufnr = vim.api.nvim_get_current_buf()
@@ -82,14 +98,13 @@ function M.predict_editor(params)
 end
 
 local function timed_request()
+  vim.notify("timed req")
+  stop_timer()
   vim.schedule_wrap(function()
+    vim.notify("launched")
     M.predict_editor()
-    -- Clean up timer
-    M.timer:stop()
-    M.timer:close()
-    M.timer = nil
   end
-  )
+  )()
 end
 
 function M.setup()
@@ -98,10 +113,7 @@ function M.setup()
   -- Create separate autocommands for insert mode events
   vim.api.nvim_create_autocmd('InsertEnter', {
     group = group,
-    callback = function()
-      stop_timer()
-      timed_request()
-    end,
+    callback = timed_request
   })
 
   vim.api.nvim_create_autocmd('TextChangedI', {

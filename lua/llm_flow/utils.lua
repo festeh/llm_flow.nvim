@@ -1,5 +1,7 @@
 local M = {}
 
+
+
 function M.check_directory_exists(path)
   local ok, stat = pcall(vim.loop.fs_stat, path)
   if not ok or not stat then
