@@ -37,7 +37,7 @@ vim.api.nvim_create_user_command('LLMRun', function(opts)
   -- Capture both return value and printed output
   local output = ""
   local function capture_print(...)
-    local args = {...}
+    local args = { ... }
     local str = ""
     for i, v in ipairs(args) do
       if i > 1 then str = str .. "\t" end
@@ -51,7 +51,7 @@ vim.api.nvim_create_user_command('LLMRun', function(opts)
   print = capture_print
 
   local ok, result = pcall(func)
-  
+
   -- Restore original print
   print = old_print
 
