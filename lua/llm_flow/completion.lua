@@ -1,6 +1,11 @@
 local ui = require("llm_flow.ui")
 
-local M = {}
+local M = {
+  line = nil,
+  pos = nil,
+  content = nil,
+  request = nil,
+}
 
 function M.find_lsp_client()
   local clients = vim.lsp.get_clients({ bufnr = 0 })
@@ -43,29 +48,9 @@ function M.predict_editor(params, model)
     ui.set_text(cursor[1] - 1, cursor[2], content)
     return result
   end)
-  -- print(status, req_id)
-  -- print(vim.inspect(client.requests))
-  -- vim.api.nvim_create_autocmd('LspRequest', {
-  --   callback = function(args)
-  --     vim.notify("kek")
-  --     local bufnr = args.buf
-  --     local client_id = args.data.client_id
-  --     local request_id = args.data.request_id
-  --     local request = args.data.request
-  --     if request.type == 'pending' then
-  --       -- do something with pending requests
-  --       -- track_pending(client_id, bufnr, request_id, request)
-  --       print("got pending req")
-  --       print(vim.inspect(request))
-  --     elseif request.type == 'cancel' then
-  --       print("cancelled")
-  --       -- do something with pending cancel requests
-  --       -- track_canceling(client_id, bufnr, request_id, request)
-  --     elseif request.type == 'complete' then
-  --       print("completed")
-  --     end
-  --   end,
-  -- })
+end
+
+function M.setup()
 end
 
 return M
