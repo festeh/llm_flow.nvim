@@ -49,8 +49,10 @@ function M.predict_editor(params, model)
     local bufnr = vim.api.nvim_get_current_buf()
     local buffer_lines = vim.api.nvim_buf_get_lines(bufnr, cursor[1] - 1, cursor[1] + #content_lines - 1, false)
     for i = 2, #content_lines do
-      print(i, content_lines[i], buffer_lines[i])
-      if content_lines[i] == buffer_lines[i] then
+      local trimmed_content = vim.trim(content_lines[i] or "")
+      local trimmed_buffer = vim.trim(buffer_lines[i] or "")
+      print(i, trimmed_content, trimmed_buffer)
+      if trimmed_content == trimmed_buffer then
         break
       end
       table.insert(truncated_content, content_lines[i])
