@@ -5,7 +5,6 @@ local api = vim.api
 local M = {}
 
 
-
 local function ensure_install()
   local data_path = vim.fn.stdpath('data')
   local llm_flow_path = data_path .. '/llm_flow'
@@ -57,7 +56,7 @@ M.setup = function()
   api.nvim_create_augroup(augroup, { clear = true })
   api.nvim_create_autocmd("BufEnter", {
     group = augroup,
-    pattern = {"*.c", "*.lua"},
+    pattern = { "*.c", "*.lua", "*.py" },
     callback = function(ev)
       if not lsp.buf_is_attached(ev.buf, client_id) then
         lsp.buf_attach_client(ev.buf, client_id)
