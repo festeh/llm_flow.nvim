@@ -11,12 +11,20 @@ function M.set_text(line, pos, text)
   -- Clear any existing virtual text in this namespace
   vim.api.nvim_buf_clear_namespace(bufnr, ns_id, 0, -1)
 
-  -- Create virtual text
-  vim.api.nvim_buf_set_extmark(bufnr, ns_id, line, pos, {
-    virt_text = { { text, 'Comment' } },
-    virt_text_pos = 'inline',
-    hl_mode = 'combine',
-  })
+  -- Split text into lines
+  local lines = vim.split(text, '\n', { plain = true })
+  
+  -- Create virtual text for each line
+  for i, line_text in ipairs(lines) do
+    local line_num = line + i - 1
+    local col_pos = (i == 1) and pos or 0  -- Use pos for first line, 0 for others
+    
+    vim.api.nvim_buf_set_extmark(bufnr, ns_id, line_num, col_pos, {
+      virt_text = { { line_text, 'Comment' } },
+      virt_text_pos = 'inline',
+      hl_mode = 'combine',
+    })
+  end
 end
 
 function M.example()
