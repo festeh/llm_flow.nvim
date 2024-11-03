@@ -4,7 +4,7 @@ local M = {
   line = nil,
   pos = nil,
   content = nil,
-  request = nil,
+  req_id = nil,
 }
 
 function M.find_lsp_client()
@@ -43,6 +43,10 @@ function M.predict_editor(params, model)
       vim.notify("Prediction failed: " .. err.message, vim.log.levels.ERROR)
       return
     end
+    if result.id ~= M.req_id then
+      print("cancelled", result.id, M.req_id)
+      return
+    end
     local content = result.content
     local content_lines = vim.split(content, "\n", { plain = true })
     local truncated_content = { content_lines[1] }
@@ -61,6 +65,7 @@ function M.predict_editor(params, model)
     ui.set_text(cursor[1] - 1, cursor[2], final_content)
     return result
   end)
+  M.req_id = req_id
 end
 
 function M.setup()
