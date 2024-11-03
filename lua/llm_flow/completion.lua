@@ -77,6 +77,17 @@ function M.predict_editor(params)
   M.req_id = req_id
 end
 
+local function timed_request()
+  vim.schedule_wrap(function()
+    M.predict_editor()
+    -- Clean up timer
+    M.timer:stop()
+    M.timer:close()
+    M.timer = nil
+  end
+  )
+end
+
 function M.setup()
   local group = vim.api.nvim_create_augroup('LLMFlow', { clear = true })
 
@@ -88,17 +99,12 @@ function M.setup()
       if M.timer then
         M.timer:stop()
         M.timer:close()
+        return
       end
 
       -- Create new timer for debouncing
       M.timer = uv.new_timer()
-      M.timer:start(50, 0, vim.schedule_wrap(function()
-        M.predict_editor()
-        -- Clean up timer
-        M.timer:stop()
-        M.timer:close()
-        M.timer = nil
-      end))
+      M.timer:start(250, 0, timed_request)
     end,
   })
 

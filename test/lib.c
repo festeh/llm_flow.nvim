@@ -1,7 +1,9 @@
- 
+# 
+
+
 #include <stdio.h>
 int main() {
-    int ;
+    int 
     printf("Enter an integer: ");
     scanf("%d", &num);
 

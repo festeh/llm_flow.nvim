@@ -15,15 +15,13 @@ function M.set_text(line, pos, text)
   end
 
   local ns_id = vim.api.nvim_create_namespace('llm_flow')
-  
-  -- Set first line as inline virtual text
+
   vim.api.nvim_buf_set_extmark(bufnr, ns_id, line, pos, {
     virt_text = { { lines[1], 'Comment' } },
     virt_text_pos = 'inline',
     hl_mode = 'combine',
   })
 
-  -- If there are additional lines, add them as virtual lines after the first line
   if #lines > 1 then
     local virt_lines = {}
     for i = 2, #lines do
