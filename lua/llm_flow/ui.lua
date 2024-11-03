@@ -23,4 +23,11 @@ function M.example()
   M.set_text(0, 0, "benis")
 end
 
+-- Clears all virtual text created by llm_flow
+function M.clear_text()
+  local bufnr = vim.api.nvim_get_current_buf()
+  local ns_id = vim.api.nvim_create_namespace('llm_flow')
+  vim.api.nvim_buf_clear_namespace(bufnr, ns_id, 0, -1)
+end
+
 return M
