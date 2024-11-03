@@ -24,7 +24,7 @@ function M.example()
 end
 
 -- Clears all virtual text created by llm_flow
-function M.clear_text()
+function M.clear()
   local bufnr = vim.api.nvim_get_current_buf()
   local ns_id = vim.api.nvim_create_namespace('llm_flow')
   vim.api.nvim_buf_clear_namespace(bufnr, ns_id, 0, -1)

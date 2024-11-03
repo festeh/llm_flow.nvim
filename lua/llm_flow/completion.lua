@@ -1,3 +1,5 @@
+local ui = require("llm_flow.ui")
+
 local M = {}
 
 function M.find_lsp_client()
@@ -36,11 +38,13 @@ function M.predict_editor(params, model)
       vim.notify("Prediction failed: " .. err.message, vim.log.levels.ERROR)
       return
     end
-    print("RES", result)
+    local content = result.content
+    print("content:", content)
+    ui.set_text(cursor[1] - 1, cursor[2], content)
     return result
   end)
-  print(status, req_id)
-  print(vim.inspect(client.requests))
+  -- print(status, req_id)
+  -- print(vim.inspect(client.requests))
   -- vim.api.nvim_create_autocmd('LspRequest', {
   --   callback = function(args)
   --     vim.notify("kek")
