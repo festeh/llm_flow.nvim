@@ -5,6 +5,7 @@ local M = {
   pos = nil,
   content = nil,
   req_id = nil,
+  timer = nil,
 }
 
 function M.find_lsp_client()
@@ -69,6 +70,42 @@ function M.predict_editor(params, model)
 end
 
 function M.setup()
+  local group = vim.api.nvim_create_augroup('LLMFlow', { clear = true })
+  
+  -- Create autocommands for insert mode events
+  vim.api.nvim_create_autocmd({ 'InsertEnter', 'InsertCharPre' }, {
+    group = group,
+    callback = function()
+      -- Cancel existing timer if any
+      if M.timer then
+        M.timer:stop()
+        M.timer:close()
+      end
+      
+      -- Create new timer for debouncing
+      M.timer = vim.loop.new_timer()
+      M.timer:start(50, 0, vim.schedule_wrap(function()
+        M.predict_editor()
+        -- Clean up timer
+        M.timer:stop()
+        M.timer:close()
+        M.timer = nil
+      end))
+    end,
+  })
+
+  -- Clear virtual text when leaving insert mode
+  vim.api.nvim_create_autocmd('InsertLeave', {
+    group = group,
+    callback = function()
+      if M.timer then
+        M.timer:stop()
+        M.timer:close()
+        M.timer = nil
+      end
+      ui.clear_text()
+    end,
+  })
 end
 
 return M
