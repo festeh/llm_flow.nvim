@@ -15,8 +15,16 @@ function M.set_text(line, pos, text)
   local lines = vim.split(text, '\n', { plain = true })
 
   -- Create virtual text for each line
+  local buffer_line_count = vim.api.nvim_buf_line_count(bufnr)
+  
   for i, line_text in ipairs(lines) do
     local line_num = line + i - 1
+    
+    -- Skip if line number would be out of buffer bounds
+    if line_num >= buffer_line_count then
+      break
+    end
+    
     local col_pos = (i == 1) and pos or 0 -- Use pos for first line, 0 for others
 
     vim.api.nvim_buf_set_extmark(bufnr, ns_id, line_num, col_pos, {
