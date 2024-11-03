@@ -9,6 +9,10 @@ local M = {
   timer = nil,
 }
 
+local function stop_timer()
+  stop_timer()
+end
+
 function M.find_lsp_client()
   local clients = vim.lsp.get_clients({ bufnr = 0 })
   for _, client in pairs(clients) do
@@ -95,11 +99,7 @@ function M.setup()
   vim.api.nvim_create_autocmd('InsertEnter', {
     group = group,
     callback = function()
-      if M.timer then
-        M.timer:stop()
-        M.timer:close()
-        M.timer = nil
-      end
+      stop_timer()
       timed_request()
     end,
   })
@@ -107,13 +107,7 @@ function M.setup()
   vim.api.nvim_create_autocmd('TextChangedI', {
     group = group,
     callback = function()
-      -- Cancel existing timer if any
-      if M.timer then
-        M.timer:stop()
-        M.timer:close()
-        M.timer = nil
-      end
-
+      stop_timer()
       M.timer = uv.new_timer()
       M.timer:start(250, 0, timed_request)
     end,
@@ -123,11 +117,7 @@ function M.setup()
   vim.api.nvim_create_autocmd('InsertLeave', {
     group = group,
     callback = function()
-      if M.timer then
-        M.timer:stop()
-        M.timer:close()
-        M.timer = nil
-      end
+      stop_timer()
       ui.clear()
     end,
   })
