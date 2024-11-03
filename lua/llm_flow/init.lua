@@ -53,7 +53,7 @@ M.setup = function()
   api.nvim_create_augroup(augroup, { clear = true })
   api.nvim_create_autocmd("BufEnter", {
     group = augroup,
-    pattern = "*.c",
+    pattern = {"*.c", "*.lua"},
     callback = function(ev)
       if not lsp.buf_is_attached(ev.buf, client_id) then
         lsp.buf_attach_client(ev.buf, client_id)
