@@ -109,4 +109,19 @@ function M.setup()
   })
 end
 
+function M.desetup()
+  -- Clear any existing timer
+  if M.timer then
+    M.timer:stop()
+    M.timer:close()
+    M.timer = nil
+  end
+  
+  -- Clear the autocommands by deleting the group
+  pcall(vim.api.nvim_del_augroup_by_name, 'LLMFlow')
+  
+  -- Clear any remaining virtual text
+  ui.clear()
+end
+
 return M
