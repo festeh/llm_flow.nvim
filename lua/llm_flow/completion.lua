@@ -139,16 +139,40 @@ function M.setup()
   })
 end
 
+local function get_current_line_after_cursor()
+  local line = vim.api.nvim_get_current_line()
+  local _, col = unpack(vim.api.nvim_win_get_cursor(0))
+  return line:sub(col + 1)
+end
+
 function M.accept_line()
   if M.suggestion then
     local lines = vim.split(M.suggestion, "\n", { plain = true })
-    local first_line = lines[1]
-    if first_line then
-      ui.accept_text(M.line, M.pos, first_line)
-      stop_timer_and_cancel()
-      M.timer = uv.new_timer()
-      M.timer:start(kDebounce, 0, timed_request)
+    
+    -- If there's no text after cursor and we have more than one line
+    local text_after_cursor = get_current_line_after_cursor()
+    if text_after_cursor:match("^%s*$") and #lines > 1 then
+      -- Accept the next line instead
+      local next_line = lines[2]
+      if next_line then
+        ui.accept_text(M.line, M.pos, next_line)
+        -- Move cursor to end of accepted line
+        vim.schedule(function()
+          local new_pos = #next_line
+          vim.api.nvim_win_set_cursor(0, {M.line + 1, new_pos})
+        end)
+      end
+    else
+      -- Regular behavior - accept first line
+      local first_line = lines[1]
+      if first_line then
+        ui.accept_text(M.line, M.pos, first_line)
+      end
     end
+    
+    stop_timer_and_cancel()
+    M.timer = uv.new_timer()
+    M.timer:start(kDebounce, 0, timed_request)
   end
 end
 
