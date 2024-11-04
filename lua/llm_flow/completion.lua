@@ -19,7 +19,7 @@ local function stop_timer_and_cancel()
   local client = M.client
   if client then
     for req_id, _ in pairs(client.requests) do
-      client.request('cancel_predict_editor', { id = req_id }, function() end, 0)
+      client.notify('cancel_predict_editor', { id = req_id })
     end
   end
 end
@@ -69,9 +69,6 @@ function M.predict_editor(params)
     vim.notify("No llm-flow LSP client found", vim.log.levels.ERROR)
     return
   end
-
-  print(client.name)
-  print(vim.inspect(client.server_capabilities))
 
   params = params or {}
   local bufnr = vim.api.nvim_get_current_buf()
