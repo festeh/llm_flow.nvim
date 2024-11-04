@@ -10,13 +10,13 @@ local M = {
   timer = nil,
 }
 
-local function stop_timer(client)
+local function stop_timer_and_cancel(client)
   if M.timer then
     M.timer:stop()
     M.timer:close()
     M.timer = nil
   end
-  
+
   if client and M.req_id then
     client.request('cancel_predict_editor', { id = M.req_id }, function() end)
     M.req_id = nil
@@ -28,14 +28,9 @@ function M.find_lsp_client()
   local found = nil
   for _, client in pairs(clients) do
     if client.name == "llm-flow" then
-      found = client
+      return client
     end
-    print(client.name)
-    print(vim.inspect(client))
-    print("------------------------------")
-    print()
   end
-  return found
 end
 
 local function on_predict_complete(err, result)
@@ -106,7 +101,7 @@ end
 local function timed_request()
   vim.notify("timed req")
   local client = M.find_lsp_client()
-  stop_timer(client)
+  stop_timer_and_cancel(client)
   vim.schedule_wrap(function()
     vim.notify("launched")
     M.predict_editor()
@@ -127,7 +122,7 @@ function M.setup()
     group = group,
     callback = function()
       local client = M.find_lsp_client()
-      stop_timer(client)
+      stop_timer_and_cancel(client)
       M.timer = uv.new_timer()
       M.timer:start(250, 0, timed_request)
     end,
@@ -138,7 +133,7 @@ function M.setup()
     group = group,
     callback = function()
       local client = M.find_lsp_client()
-      stop_timer(client)
+      stop_timer_and_cancel(client)
       ui.clear()
     end,
   })
@@ -146,7 +141,7 @@ end
 
 function M.desetup()
   local client = M.find_lsp_client()
-  stop_timer(client)
+  stop_timer_and_cancel(client)
   pcall(vim.api.nvim_del_augroup_by_name, 'LLMFlow')
   ui.clear()
 end
