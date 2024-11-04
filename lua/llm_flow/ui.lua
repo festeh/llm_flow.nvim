@@ -47,4 +47,18 @@ function M.clear()
   vim.api.nvim_buf_clear_namespace(bufnr, ns_id, 0, -1)
 end
 
+-- Accepts the suggested text by inserting it at the specified position
+-- @param line: 0-based line number
+-- @param pos: 0-based column position 
+-- @param text: text to insert
+function M.accept_text(line, pos, text)
+  local bufnr = vim.api.nvim_get_current_buf()
+  local current_line = vim.api.nvim_buf_get_lines(bufnr, line, line + 1, false)[1]
+  local new_line = current_line:sub(1, pos) .. text
+  vim.api.nvim_buf_set_lines(bufnr, line, line + 1, false, {new_line})
+  -- Move cursor to end of inserted text
+  vim.api.nvim_win_set_cursor(0, {line + 1, pos + #text})
+  M.clear()
+end
+
 return M
