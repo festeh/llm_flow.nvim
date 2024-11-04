@@ -139,19 +139,21 @@ function M.setup()
   })
 end
 
-local function get_current_line_after_cursor()
-  local line = vim.api.nvim_get_current_line()
+local function get_virtual_text_after_cursor()
+  if not M.suggestion then return "" end
+  local lines = vim.split(M.suggestion, "\n", { plain = true })
+  local first_line = lines[1] or ""
   local _, col = unpack(vim.api.nvim_win_get_cursor(0))
-  return line:sub(col + 1)
+  return first_line:sub(col + 1)
 end
 
 function M.accept_line()
   if M.suggestion then
     local lines = vim.split(M.suggestion, "\n", { plain = true })
     
-    -- If there's no text after cursor and we have more than one line
-    local text_after_cursor = get_current_line_after_cursor()
-    if text_after_cursor:match("^%s*$") and #lines > 1 then
+    -- If there's no virtual text after cursor and we have more than one line
+    local virtual_text = get_virtual_text_after_cursor()
+    if virtual_text == "" and #lines > 1 then
       -- Accept the next line instead
       local next_line = lines[2]
       if next_line then
