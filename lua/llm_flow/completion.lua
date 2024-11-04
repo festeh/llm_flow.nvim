@@ -3,6 +3,7 @@ local uv = vim.uv
 
 
 local M = {
+  suggestion = nil,
   line = nil,
   pos = nil,
   content = nil,
@@ -40,6 +41,7 @@ local function on_predict_complete(err, result)
     return
   end
   local content = result.content
+  M.suggestion = content
   local content_lines = vim.split(content, "\n", { plain = true })
   local truncated_content = { content_lines[1] }
   local bufnr = vim.api.nvim_get_current_buf()
@@ -101,6 +103,15 @@ end
 function M.setup()
   local group = vim.api.nvim_create_augroup('LLMFlow', { clear = true })
 
+  -- Set up keybindings
+  vim.keymap.set('i', '<C-l>', function()
+    M.accept_line()
+  end, { noremap = true, silent = true })
+
+  vim.keymap.set('i', '<C-k>', function()
+    M.accept_word()
+  end, { noremap = true, silent = true })
+
   -- Create separate autocommands for insert mode events
   vim.api.nvim_create_autocmd('InsertEnter', {
     group = group,
@@ -124,6 +135,35 @@ function M.setup()
       ui.clear()
     end,
   })
+end
+
+function M.accept_line()
+  if M.suggestion then
+    local lines = vim.split(M.suggestion, "\n", { plain = true })
+    local first_line = lines[1]
+    if first_line then
+      ui.accept_text(M.line, M.pos, first_line)
+      stop_timer_and_cancel()
+      M.timer = uv.new_timer()
+      M.timer:start(250, 0, timed_request)
+    end
+  end
+end
+
+function M.accept_word()
+  if M.suggestion then
+    local first_line = vim.split(M.suggestion, "\n", { plain = true })[1]
+    if first_line then
+      local words = vim.split(first_line, " ", { plain = true })
+      local first_word = words[1]
+      if first_word then
+        ui.accept_text(M.line, M.pos, first_word)
+        stop_timer_and_cancel()
+        M.timer = uv.new_timer()
+        M.timer:start(250, 0, timed_request)
+      end
+    end
+  end
 end
 
 function M.desetup()
