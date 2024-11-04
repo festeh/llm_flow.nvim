@@ -17,8 +17,10 @@ local function stop_timer_and_cancel(client)
     M.timer = nil
   end
 
-  if client and M.req_id then
-    client.request('cancel_predict_editor', { id = M.req_id }, function() end)
+  if client then
+    for req_id, _ in pairs(client.requests) do
+      client.request('cancel_predict_editor', { id = req_id }, function() end)
+    end
     M.req_id = nil
   end
 end
