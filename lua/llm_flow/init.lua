@@ -52,22 +52,21 @@ M.setup = function()
     return false
   end
 
-  -- Send didOpen for all existing matching buffers
-  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-    local bufname = vim.api.nvim_buf_get_name(buf)
-    if bufname:match("%.c$") or bufname:match("%.lua$") or bufname:match("%.py$") then
-      lsp.buf_attach_client(buf, client_id)
-      local uri = vim.uri_from_bufnr(buf)
-      local text = table.concat(vim.api.nvim_buf_get_lines(buf, 0, -1, false), '\n')
-      lsp.notify(client_id, 'textDocument/didOpen', {
-        textDocument = {
-          uri = uri,
-          languageId = vim.bo[buf].filetype,
-          version = 0,
-          text = text
-        }
-      })
-    end
+  -- Send didOpen for current buffer if it matches
+  local current_buf = vim.api.nvim_get_current_buf()
+  local bufname = vim.api.nvim_buf_get_name(current_buf)
+  if bufname:match("%.c$") or bufname:match("%.lua$") or bufname:match("%.py$") then
+    lsp.buf_attach_client(current_buf, client_id)
+    local uri = vim.uri_from_bufnr(current_buf)
+    local text = table.concat(vim.api.nvim_buf_get_lines(current_buf, 0, -1, false), '\n')
+    lsp.notify(client_id, 'textDocument/didOpen', {
+      textDocument = {
+        uri = uri,
+        languageId = vim.bo[current_buf].filetype,
+        version = 0,
+        text = text
+      }
+    })
   end
 
   local augroup = server_name
