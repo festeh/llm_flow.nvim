@@ -144,7 +144,11 @@ local function get_virtual_text_after_cursor()
   local lines = vim.split(M.suggestion, "\n", { plain = true })
   local first_line = lines[1] or ""
   local _, col = unpack(vim.api.nvim_win_get_cursor(0))
-  return first_line:sub(col + 1)
+  local current_line = vim.api.nvim_get_current_line()
+  -- Account for real text length difference
+  local virtual_offset = #first_line - #current_line
+  if virtual_offset < 0 then return "" end
+  return first_line:sub(col + 1 + virtual_offset)
 end
 
 function M.accept_line()
