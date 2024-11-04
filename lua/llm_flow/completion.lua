@@ -6,30 +6,29 @@ local M = {
   line = nil,
   pos = nil,
   content = nil,
-  req_id = nil,
   timer = nil,
+  client = nil
 }
 
-local function stop_timer_and_cancel(client)
+local function stop_timer_and_cancel()
   if M.timer then
     M.timer:stop()
     M.timer:close()
     M.timer = nil
   end
-
+  local client = M.client
   if client then
     for req_id, _ in pairs(client.requests) do
-      client.request('cancel_predict_editor', { id = req_id }, function() end)
+      client.request('cancel_predict_editor', { id = req_id }, function() end, 0)
     end
-    M.req_id = nil
   end
 end
 
 function M.find_lsp_client()
   local clients = vim.lsp.get_clients({ bufnr = 0 })
-  local found = nil
   for _, client in pairs(clients) do
     if client.name == "llm-flow" then
+      M.client = client
       return client
     end
   end
@@ -40,10 +39,6 @@ local function on_predict_complete(err, result)
     vim.notify("Prediction failed: " .. err.message, vim.log.levels.ERROR)
     return
   end
-  if result.id ~= M.req_id then
-    print("cancelled", result.id, M.req_id)
-    return
-  end
   local content = result.content
   local content_lines = vim.split(content, "\n", { plain = true })
   local truncated_content = { content_lines[1] }
@@ -52,8 +47,6 @@ local function on_predict_complete(err, result)
   for i = 2, #content_lines do
     local trimmed_content = vim.trim(content_lines[i] or "")
     local trimmed_buffer = vim.trim(buffer_lines[i] or "")
-    print(i, "|", trimmed_content, "|, |", trimmed_buffer, "|")
-
     if trimmed_content == trimmed_buffer then
       break
     end
@@ -97,14 +90,11 @@ function M.predict_editor(params)
     pos = pos
   })
   local status, req_id = client.request("predict_editor", request_params, on_predict_complete)
-  M.req_id = req_id
 end
 
 local function timed_request()
-  vim.notify("timed req")
-  local client = M.find_lsp_client()
-  stop_timer_and_cancel(client)
   vim.schedule_wrap(function()
+    stop_timer_and_cancel()
     vim.notify("launched")
     M.predict_editor()
   end
@@ -123,8 +113,7 @@ function M.setup()
   vim.api.nvim_create_autocmd('TextChangedI', {
     group = group,
     callback = function()
-      local client = M.find_lsp_client()
-      stop_timer_and_cancel(client)
+      stop_timer_and_cancel()
       M.timer = uv.new_timer()
       M.timer:start(250, 0, timed_request)
     end,
@@ -134,16 +123,14 @@ function M.setup()
   vim.api.nvim_create_autocmd('InsertLeave', {
     group = group,
     callback = function()
-      local client = M.find_lsp_client()
-      stop_timer_and_cancel(client)
+      stop_timer_and_cancel()
       ui.clear()
     end,
   })
 end
 
 function M.desetup()
-  local client = M.find_lsp_client()
-  stop_timer_and_cancel(client)
+  stop_timer_and_cancel()
   pcall(vim.api.nvim_del_augroup_by_name, 'LLMFlow')
   ui.clear()
 end
