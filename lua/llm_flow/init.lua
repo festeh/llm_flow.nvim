@@ -60,6 +60,17 @@ M.setup = function()
     callback = function(ev)
       if not lsp.buf_is_attached(ev.buf, client_id) then
         lsp.buf_attach_client(ev.buf, client_id)
+        -- Send textDocument/didOpen notification
+        local uri = vim.uri_from_bufnr(ev.buf)
+        local text = table.concat(vim.api.nvim_buf_get_lines(ev.buf, 0, -1, false), '\n')
+        lsp.notify(client_id, 'textDocument/didOpen', {
+          textDocument = {
+            uri = uri,
+            languageId = vim.bo[ev.buf].filetype,
+            version = 0,
+            text = text
+          }
+        })
       end
     end,
   })
