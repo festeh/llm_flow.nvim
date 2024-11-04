@@ -10,11 +10,16 @@ local M = {
   timer = nil,
 }
 
-local function stop_timer()
+local function stop_timer(client)
   if M.timer then
     M.timer:stop()
     M.timer:close()
     M.timer = nil
+  end
+  
+  if client and M.req_id then
+    client.request('cancel_predict_editor', { id = M.req_id }, function() end)
+    M.req_id = nil
   end
 end
 
@@ -100,7 +105,8 @@ end
 
 local function timed_request()
   vim.notify("timed req")
-  stop_timer()
+  local client = M.find_lsp_client()
+  stop_timer(client)
   vim.schedule_wrap(function()
     vim.notify("launched")
     M.predict_editor()
@@ -120,7 +126,8 @@ function M.setup()
   vim.api.nvim_create_autocmd('TextChangedI', {
     group = group,
     callback = function()
-      stop_timer()
+      local client = M.find_lsp_client()
+      stop_timer(client)
       M.timer = uv.new_timer()
       M.timer:start(250, 0, timed_request)
     end,
@@ -130,18 +137,16 @@ function M.setup()
   vim.api.nvim_create_autocmd('InsertLeave', {
     group = group,
     callback = function()
-      stop_timer()
+      local client = M.find_lsp_client()
+      stop_timer(client)
       ui.clear()
     end,
   })
 end
 
 function M.desetup()
-  if M.timer then
-    M.timer:stop()
-    M.timer:close()
-    M.timer = nil
-  end
+  local client = M.find_lsp_client()
+  stop_timer(client)
   pcall(vim.api.nvim_del_augroup_by_name, 'LLMFlow')
   ui.clear()
 end
