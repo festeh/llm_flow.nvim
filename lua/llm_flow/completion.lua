@@ -2,6 +2,8 @@ local ui = require("llm_flow.ui")
 local uv = vim.uv
 
 
+local kDebounce = 250 -- ms
+
 local M = {
   suggestion = nil,
   line = nil,
@@ -123,7 +125,7 @@ function M.setup()
     callback = function()
       stop_timer_and_cancel()
       M.timer = uv.new_timer()
-      M.timer:start(250, 0, timed_request)
+      M.timer:start(kDebounce, 0, timed_request)
     end,
   })
 
@@ -145,7 +147,7 @@ function M.accept_line()
       ui.accept_text(M.line, M.pos, first_line)
       stop_timer_and_cancel()
       M.timer = uv.new_timer()
-      M.timer:start(250, 0, timed_request)
+      M.timer:start(kDebounce, 0, timed_request)
     end
   end
 end
@@ -160,7 +162,7 @@ function M.accept_word()
         ui.accept_text(M.line, M.pos, first_word)
         stop_timer_and_cancel()
         M.timer = uv.new_timer()
-        M.timer:start(250, 0, timed_request)
+        M.timer:start(kDebounce, 0, timed_request)
       end
     end
   end
