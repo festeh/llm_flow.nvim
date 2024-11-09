@@ -6,9 +6,6 @@ local kDebounce = 250 -- ms
 
 local M = {
   suggestion = nil,
-  line = nil,
-  pos = nil,
-  content = nil,
   timer = nil,
   client = nil
 }
@@ -51,7 +48,7 @@ local function on_predict_complete(err, result, line, pos)
   local content_lines = vim.split(content, "\n", { plain = true })
   local truncated_content = { content_lines[1] }
   local bufnr = vim.api.nvim_get_current_buf()
-  local buffer_lines = vim.api.nvim_buf_get_lines(bufnr, M.line, M.line + #content_lines, false)
+  local buffer_lines = vim.api.nvim_buf_get_lines(bufnr, line, line + #content_lines, false)
   for i = 2, #content_lines do
     local trimmed_content = vim.trim(content_lines[i] or "")
     local trimmed_buffer = vim.trim(buffer_lines[i] or "")
@@ -61,7 +58,7 @@ local function on_predict_complete(err, result, line, pos)
     table.insert(truncated_content, content_lines[i])
   end
   local final_content = table.concat(truncated_content, "\n")
-  ui.set_text(M.line, M.pos, final_content)
+  ui.set_text(line, pos, final_content)
   return result
 end
 
@@ -84,9 +81,6 @@ function M.predict_editor(params)
 
   local line = cursor[1] - 1
   local pos = cursor[2]
-
-  M.line = line
-  M.pos = pos
 
   local request_params = vim.tbl_extend("force", params, {
     providerAndModel = "codestral/codestral-latest",
@@ -160,34 +154,38 @@ local function get_virtual_text_after_cursor()
 end
 
 function M.accept_line()
-  if M.suggestion then
-    local lines = vim.split(M.suggestion.content, "\n", { plain = true })
-    
-    -- If there's no virtual text after cursor and we have more than one line
-    local virtual_text = get_virtual_text_after_cursor()
-    if virtual_text == "" and #lines > 1 then
-      -- Accept the next line instead
-      local next_line = lines[2]
-      if next_line then
-        ui.accept_text(M.line, M.pos, next_line)
-        -- Move cursor to end of accepted line
-        vim.schedule(function()
-          local new_pos = #next_line
-          vim.api.nvim_win_set_cursor(0, {M.line + 1, new_pos})
-        end)
-      end
-    else
-      -- Regular behavior - accept first line
-      local first_line = lines[1]
-      if first_line then
-        ui.accept_text(M.line, M.pos, first_line)
-      end
-    end
-    
-    stop_timer_and_cancel()
-    M.timer = uv.new_timer()
-    M.timer:start(kDebounce, 0, timed_request)
+  if not M.suggestion then
+    return
   end
+  local line = M.suggestion.line
+  local pos = M.suggestion.pos
+  local content = M.suggestion.content
+  local lines = vim.split(content, "\n", { plain = true })
+
+  -- If there's no virtual text after cursor and we have more than one line
+  local virtual_text = get_virtual_text_after_cursor()
+  if virtual_text == "" and #lines > 1 then
+    -- Accept the next line instead
+    local next_line = lines[2]
+    if next_line then
+      ui.accept_text(line, pos, next_line)
+      -- Move cursor to end of accepted line
+      vim.schedule(function()
+        local new_pos = #next_line
+        vim.api.nvim_win_set_cursor(0, { line + 1, new_pos })
+      end)
+    end
+  else
+    -- Regular behavior - accept first line
+    local first_line = lines[1]
+    if first_line then
+      ui.accept_text(line, pos, first_line)
+    end
+  end
+
+  stop_timer_and_cancel()
+  M.timer = uv.new_timer()
+  M.timer:start(kDebounce, 0, timed_request)
 end
 
 function M.accept_word()
