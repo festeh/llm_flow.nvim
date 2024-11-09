@@ -167,10 +167,15 @@ function M.accept_line()
 
   local virtual_text = get_virtual_text_after_cursor()
   if virtual_text == "" and #lines > 1 then
-    -- Accept the next line instead
+    -- Accept the next line instead, shifting existing lines down
     local next_line = lines[2]
     if next_line then
-      ui.accept_text(line + 1, pos, next_line)
+      local bufnr = vim.api.nvim_get_current_buf()
+      -- Get all lines after current line
+      local existing_lines = vim.api.nvim_buf_get_lines(bufnr, line + 1, -1, false)
+      -- Insert new line and shift existing lines down
+      vim.api.nvim_buf_set_lines(bufnr, line + 1, line + 1, false, {next_line})
+      vim.api.nvim_buf_set_lines(bufnr, line + 2, line + 2, false, existing_lines)
       -- Move cursor to end of accepted line
       vim.schedule(function()
         local new_pos = #next_line
