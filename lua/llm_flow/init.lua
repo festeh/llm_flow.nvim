@@ -59,7 +59,8 @@ M.setup = function()
     lsp.buf_attach_client(current_buf, client_id)
     local uri = vim.uri_from_bufnr(current_buf)
     local text = table.concat(vim.api.nvim_buf_get_lines(current_buf, 0, -1, false), '\n')
-    lsp.notify(client_id, 'textDocument/didOpen', {
+    local client = lsp.get_client_by_id(client_id)
+    client:notify('textDocument/didOpen', {
       textDocument = {
         uri = uri,
         languageId = vim.bo[current_buf].filetype,
