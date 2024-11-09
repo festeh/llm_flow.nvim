@@ -61,4 +61,22 @@ function M.accept_text(line, pos, text)
   M.clear()
 end
 
+-- Accepts the next line of suggestion by inserting it and shifting existing lines down
+-- @param line: 0-based line number
+-- @param next_line: text to insert as new line
+function M.accept_next_line(line, next_line)
+  local bufnr = vim.api.nvim_get_current_buf()
+  M.clear()
+  -- Get all lines after current line
+  local existing_lines = vim.api.nvim_buf_get_lines(bufnr, line + 1, -1, false)
+  -- Insert new line and shift existing lines down
+  vim.api.nvim_buf_set_lines(bufnr, line + 1, line + 1, false, {next_line})
+  vim.api.nvim_buf_set_lines(bufnr, line + 2, line + 2, false, existing_lines)
+  -- Move cursor to end of accepted line
+  vim.schedule(function()
+    local new_pos = #next_line
+    vim.api.nvim_win_set_cursor(0, { line + 2, new_pos })
+  end)
+end
+
 return M
