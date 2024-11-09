@@ -37,13 +37,17 @@ function M.find_lsp_client()
   end
 end
 
-local function on_predict_complete(err, result)
+local function on_predict_complete_impl(err, result, line, pos)
   if err then
     vim.notify("Prediction failed: " .. err.message, vim.log.levels.ERROR)
     return
   end
   local content = result.content
-  M.suggestion = content
+  M.suggestion = {
+    content = content,
+    line = line,
+    pos = pos
+  }
   local content_lines = vim.split(content, "\n", { plain = true })
   local truncated_content = { content_lines[1] }
   local bufnr = vim.api.nvim_get_current_buf()
@@ -143,7 +147,7 @@ end
 
 local function get_virtual_text_after_cursor()
   if not M.suggestion then return "" end
-  local lines = vim.split(M.suggestion, "\n", { plain = true })
+  local lines = vim.split(M.suggestion.content, "\n", { plain = true })
   local first_line = lines[1] or ""
   local _, col = unpack(vim.api.nvim_win_get_cursor(0))
   local current_line = vim.api.nvim_get_current_line()
@@ -155,7 +159,7 @@ end
 
 function M.accept_line()
   if M.suggestion then
-    local lines = vim.split(M.suggestion, "\n", { plain = true })
+    local lines = vim.split(M.suggestion.content, "\n", { plain = true })
     
     -- If there's no virtual text after cursor and we have more than one line
     local virtual_text = get_virtual_text_after_cursor()
@@ -186,7 +190,7 @@ end
 
 function M.accept_word()
   if M.suggestion then
-    local first_line = vim.split(M.suggestion, "\n", { plain = true })[1]
+    local first_line = vim.split(M.suggestion.content, "\n", { plain = true })[1]
     if first_line then
       local words = vim.split(first_line, " ", { plain = true })
       local first_word = words[1]
