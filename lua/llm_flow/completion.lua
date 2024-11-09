@@ -174,7 +174,7 @@ function M.accept_line()
       -- Get all lines after current line
       local existing_lines = vim.api.nvim_buf_get_lines(bufnr, line + 1, -1, false)
       -- Insert new line and shift existing lines down
-      vim.api.nvim_buf_set_lines(bufnr, line + 1, line + 1, false, {next_line})
+      vim.api.nvim_buf_set_lines(bufnr, line + 1, line + 1, false, { next_line })
       vim.api.nvim_buf_set_lines(bufnr, line + 2, line + 2, false, existing_lines)
       -- Move cursor to end of accepted line
       vim.schedule(function()
