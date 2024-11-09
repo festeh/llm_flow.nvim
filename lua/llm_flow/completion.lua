@@ -143,6 +143,11 @@ end
 
 local function get_virtual_text_after_cursor()
   if not M.suggestion then return "" end
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local cursor_line = cursor[1] - 1
+  -- Check if suggestion is still valid for current cursor line
+  if cursor_line ~= M.suggestion.line then return "" end
+  
   local lines = vim.split(M.suggestion.content, "\n", { plain = true })
   local first_line = lines[1] or ""
   local current_line = vim.api.nvim_get_current_line()
