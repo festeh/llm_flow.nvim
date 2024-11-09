@@ -54,7 +54,11 @@ end
 function M.accept_text(line, pos, text)
   local bufnr = vim.api.nvim_get_current_buf()
   local current_line = vim.api.nvim_buf_get_lines(bufnr, line, line + 1, false)[1]
-  local new_line = current_line:sub(1, pos) .. text
+  -- Split the current line into before and after cursor parts
+  local before_cursor = current_line:sub(1, pos)
+  local after_cursor = current_line:sub(pos + 1)
+  -- Create new line by joining before_cursor + new_text + after_cursor
+  local new_line = before_cursor .. text .. after_cursor
   vim.api.nvim_buf_set_lines(bufnr, line, line + 1, false, {new_line})
   -- Move cursor to end of inserted text
   vim.api.nvim_win_set_cursor(0, {line + 1, pos + #text})
