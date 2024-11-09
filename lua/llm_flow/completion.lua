@@ -37,6 +37,10 @@ function M.find_lsp_client()
   end
 end
 
+local function on_predict_complete(err, result)
+  return on_predict_complete_impl(err, result, M.line, M.pos)
+end
+
 local function on_predict_complete_impl(err, result, line, pos)
   if err then
     vim.notify("Prediction failed: " .. err.message, vim.log.levels.ERROR)
