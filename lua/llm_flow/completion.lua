@@ -170,7 +170,7 @@ function M.accept_line()
     -- Accept the next line instead
     local next_line = lines[2]
     if next_line then
-      ui.accept_text(line, pos, next_line)
+      ui.accept_text(line + 1, pos, next_line)
       -- Move cursor to end of accepted line
       vim.schedule(function()
         local new_pos = #next_line
