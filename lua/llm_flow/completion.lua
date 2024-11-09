@@ -37,11 +37,7 @@ function M.find_lsp_client()
   end
 end
 
-local function on_predict_complete(err, result)
-  return on_predict_complete_impl(err, result, M.line, M.pos)
-end
-
-local function on_predict_complete_impl(err, result, line, pos)
+local function on_predict_complete(err, result, line, pos)
   if err then
     vim.notify("Prediction failed: " .. err.message, vim.log.levels.ERROR)
     return
@@ -98,7 +94,9 @@ function M.predict_editor(params)
     line = line,
     pos = pos
   })
-  local status, req_id = client.request("predict_editor", request_params, on_predict_complete)
+  local status, req_id = client.request("predict_editor", request_params, function(err, result)
+    on_predict_complete(err, result, line, pos)
+  end)
 end
 
 local function timed_request()
