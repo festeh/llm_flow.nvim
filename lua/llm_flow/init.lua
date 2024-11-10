@@ -52,8 +52,7 @@ M.setup = function()
     return false
   end
 
-  local supported_extensions = { "c", "lua", "py", "js", "ts", "go", "svelte", "json", "md", "toml" }
-  local extension_pattern = "*." .. table.concat(supported_extensions, ",*.")
+  local supported_extensions = { "c", "lua", "py", "js", "ts", "go", "svelte", "rs", "json", "md", "toml" }
 
   -- Send didOpen for current buffer if it matches
   local current_buf = vim.api.nvim_get_current_buf()
@@ -83,6 +82,7 @@ M.setup = function()
     })
   end
 
+  local extension_pattern = "*." .. table.concat(supported_extensions, ",*.")
   local augroup = server_name
   api.nvim_create_augroup(augroup, { clear = true })
   api.nvim_create_autocmd("BufEnter", {

@@ -78,7 +78,6 @@ function M.predict_editor(params)
   local client = M.find_lsp_client()
 
   if not client then
-    vim.notify("No llm-flow LSP client found", vim.log.levels.ERROR)
     return
   end
 
