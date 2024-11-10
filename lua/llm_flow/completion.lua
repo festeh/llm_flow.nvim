@@ -2,7 +2,7 @@ local ui = require("llm_flow.ui")
 local uv = vim.uv
 
 
-local kDebounce = 250 -- ms
+local kDebounce = 100 -- ms
 
 local M = {
   suggestion = nil,
@@ -40,11 +40,12 @@ local function on_predict_complete(err, result, line, pos)
     vim.notify("Prediction failed: " .. err.message, vim.log.levels.ERROR)
     return
   end
-  
+
   -- Return if not in insert mode
   if vim.api.nvim_get_mode().mode ~= "i" then
     return
   end
+
   local content = result.content
   M.suggestion = {
     content = content,
