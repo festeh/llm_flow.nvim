@@ -150,18 +150,18 @@ function M.accept_line()
   local pos = M.suggestion.pos
   local content = M.suggestion.content
 
-  -- Check if content starts with newline
+  local lines
   if content:sub(1, 1) == "\n" then
-    -- Get the first line after the newline
-    local next_line = vim.split(content:sub(2), "\n", { plain = true })[1]
-    if next_line then
-      ui.accept_next_line(line, next_line)
+    -- Get lines after the newline
+    lines = vim.split(content:sub(2), "\n", { plain = true })
+    if lines[1] then
+      ui.accept_next_line(line, lines[1])
     end
   else
-    -- Get first line up to newline or end of string
-    local first_line = vim.split(content, "\n", { plain = true })[1]
-    if first_line then
-      ui.accept_text(line, pos, first_line)
+    -- Get all lines
+    lines = vim.split(content, "\n", { plain = true })
+    if lines[1] then
+      ui.accept_text(line, pos, lines[1])
     end
   end
 
