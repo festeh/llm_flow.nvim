@@ -15,8 +15,15 @@ function M.set_text(line, pos, text)
     return
   end
 
+  -- Get current line content to check position validity
+  local current_line = vim.api.nvim_buf_get_lines(bufnr, line, line + 1, false)[1]
+  if not current_line or pos > #current_line then
+    return
+  end
+
   local ns_id = vim.api.nvim_create_namespace('llm_flow')
 
+  -- Set first line as inline virtual text
   vim.api.nvim_buf_set_extmark(bufnr, ns_id, line, pos, {
     virt_text = { { lines[1], 'rainbow3' } },
     virt_text_pos = 'inline',
