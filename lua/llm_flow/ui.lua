@@ -69,9 +69,11 @@ function M.accept_next_line(line, next_line)
   local bufnr = vim.api.nvim_get_current_buf()
   -- Get all lines after current line
   local existing_lines = vim.api.nvim_buf_get_lines(bufnr, line + 1, -1, false)
-  -- Insert new line and shift existing lines down
-  vim.api.nvim_buf_set_lines(bufnr, line + 1, line + 1, false, { next_line })
-  vim.api.nvim_buf_set_lines(bufnr, line + 2, line + 2, false, existing_lines)
+  -- Create new lines array with next_line inserted
+  local new_lines = { next_line }
+  vim.list_extend(new_lines, existing_lines)
+  -- Replace all lines starting from line + 1
+  vim.api.nvim_buf_set_lines(bufnr, line + 1, line + 1 + #existing_lines, false, new_lines)
   -- Move cursor to end of accepted line
   vim.schedule(function()
     local new_pos = #next_line
