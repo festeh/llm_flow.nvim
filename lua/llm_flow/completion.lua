@@ -96,7 +96,6 @@ end
 local function timed_request()
   vim.schedule_wrap(function()
     stop_timer_and_cancel()
-    vim.notify("launched")
     M.predict_editor()
   end
   )()
