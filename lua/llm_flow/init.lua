@@ -52,10 +52,20 @@ M.setup = function()
     return false
   end
 
+  local supported_extensions = { "c", "lua", "py", "js", "ts", "go", "svelte", "json", "md", "toml" }
+  local extension_pattern = "*." .. table.concat(supported_extensions, ",*.")
+
   -- Send didOpen for current buffer if it matches
   local current_buf = vim.api.nvim_get_current_buf()
   local bufname = vim.api.nvim_buf_get_name(current_buf)
-  if bufname:match("%.c$") or bufname:match("%.lua$") or bufname:match("%.py$") then
+  local is_supported = false
+  for _, ext in ipairs(supported_extensions) do
+    if bufname:match("%." .. ext .. "$") then
+      is_supported = true
+      break
+    end
+  end
+  if is_supported then
     lsp.buf_attach_client(current_buf, client_id)
     local uri = vim.uri_from_bufnr(current_buf)
     local text = table.concat(vim.api.nvim_buf_get_lines(current_buf, 0, -1, false), '\n')
@@ -77,7 +87,7 @@ M.setup = function()
   api.nvim_create_augroup(augroup, { clear = true })
   api.nvim_create_autocmd("BufEnter", {
     group = augroup,
-    pattern = { "*.c", "*.lua", "*.py" },
+    pattern = { extension_pattern },
     callback = function(ev)
       if not lsp.buf_is_attached(ev.buf, client_id) then
         lsp.buf_attach_client(ev.buf, client_id)
