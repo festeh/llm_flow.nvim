@@ -141,11 +141,6 @@ function M.setup()
   })
 end
 
-local function get_virtual_text_after_cursor(lines)
-  if not M.suggestion then return "" end
-  local first_line = lines[1] or ""
-  return first_line:sub(M.suggestion.pos + 1)
-end
 
 function M.accept_line()
   if not M.suggestion then
@@ -155,18 +150,17 @@ function M.accept_line()
   local line = M.suggestion.line
   local pos = M.suggestion.pos
   local content = M.suggestion.content
-  local lines = vim.split(content, "\n", { plain = true })
 
-  local virtual_text = get_virtual_text_after_cursor(lines)
-  if virtual_text == "" and #lines > 1 then
-    -- Accept the next line instead
-    local next_line = lines[2]
+  -- Check if content starts with newline
+  if content:sub(1,1) == "\n" then
+    -- Get the first line after the newline
+    local next_line = vim.split(content:sub(2), "\n", { plain = true })[1]
     if next_line then
       ui.accept_next_line(line, next_line)
     end
   else
-    -- Regular behavior - accept first line
-    local first_line = lines[1]
+    -- Get first line up to newline or end of string
+    local first_line = vim.split(content, "\n", { plain = true })[1]
     if first_line then
       ui.accept_text(line, pos, first_line)
     end
