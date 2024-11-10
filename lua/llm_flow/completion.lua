@@ -11,6 +11,7 @@ local M = {
 }
 
 local function stop_timer_and_cancel()
+  ui.clear()
   if M.timer then
     M.timer:stop()
     M.timer:close()
@@ -187,7 +188,6 @@ end
 function M.desetup()
   stop_timer_and_cancel()
   pcall(vim.api.nvim_del_augroup_by_name, 'LLMFlow')
-  ui.clear()
 end
 
 return M

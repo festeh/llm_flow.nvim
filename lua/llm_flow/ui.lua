@@ -18,7 +18,7 @@ function M.set_text(line, pos, text)
   local ns_id = vim.api.nvim_create_namespace('llm_flow')
 
   vim.api.nvim_buf_set_extmark(bufnr, ns_id, line, pos, {
-    virt_text = { { lines[1], 'Comment' } },
+    virt_text = { { lines[1], 'rainbow3' } },
     virt_text_pos = 'inline',
     hl_mode = 'combine',
   })
@@ -26,7 +26,7 @@ function M.set_text(line, pos, text)
   if #lines > 1 then
     local virt_lines = {}
     for i = 2, #lines do
-      table.insert(virt_lines, { { lines[i], 'Comment' } })
+      table.insert(virt_lines, { { lines[i], 'rainbow2' } })
     end
     vim.api.nvim_buf_set_extmark(bufnr, ns_id, line, 0, {
       virt_lines = virt_lines,
