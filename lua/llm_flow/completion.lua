@@ -151,6 +151,7 @@ function M.accept_line()
   if not M.suggestion then
     return
   end
+  stop_timer_and_cancel()
   local line = M.suggestion.line
   local pos = M.suggestion.pos
   local content = M.suggestion.content
@@ -171,7 +172,6 @@ function M.accept_line()
     end
   end
 
-  stop_timer_and_cancel()
   M.timer = uv.new_timer()
   M.timer:start(kDebounce, 0, timed_request)
 end
