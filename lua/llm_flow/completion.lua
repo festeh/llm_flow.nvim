@@ -141,7 +141,6 @@ function M.setup()
   })
 end
 
-
 function M.accept_line()
   if not M.suggestion then
     return
@@ -152,7 +151,7 @@ function M.accept_line()
   local content = M.suggestion.content
 
   -- Check if content starts with newline
-  if content:sub(1,1) == "\n" then
+  if content:sub(1, 1) == "\n" then
     -- Get the first line after the newline
     local next_line = vim.split(content:sub(2), "\n", { plain = true })[1]
     if next_line then
