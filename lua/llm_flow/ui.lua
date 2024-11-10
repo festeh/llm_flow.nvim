@@ -1,7 +1,6 @@
 local M = {}
 
 
-
 -- Creates virtual (ghost) text at the specified position
 -- @param line: 0-based line number
 -- @param pos: 0-based column position
@@ -36,10 +35,6 @@ function M.set_text(line, pos, text)
   end
 end
 
-function M.example()
-  M.set_text(0, 0, "benis")
-end
-
 -- Clears all virtual text created by llm_flow
 function M.clear()
   local bufnr = vim.api.nvim_get_current_buf()
@@ -49,9 +44,10 @@ end
 
 -- Accepts the suggested text by inserting it at the specified position
 -- @param line: 0-based line number
--- @param pos: 0-based column position 
+-- @param pos: 0-based column position
 -- @param text: text to insert
 function M.accept_text(line, pos, text)
+  M.clear()
   local bufnr = vim.api.nvim_get_current_buf()
   local current_line = vim.api.nvim_buf_get_lines(bufnr, line, line + 1, false)[1]
   -- Split the current line into before and after cursor parts
@@ -59,9 +55,9 @@ function M.accept_text(line, pos, text)
   local after_cursor = current_line:sub(pos + 1)
   -- Create new line by joining before_cursor + new_text + after_cursor
   local new_line = before_cursor .. text .. after_cursor
-  vim.api.nvim_buf_set_lines(bufnr, line, line + 1, false, {new_line})
+  vim.api.nvim_buf_set_lines(bufnr, line, line + 1, false, { new_line })
   -- Move cursor to end of inserted text
-  vim.api.nvim_win_set_cursor(0, {line + 1, pos + #text})
+  vim.api.nvim_win_set_cursor(0, { line + 1, pos + #text })
   M.clear()
 end
 
@@ -69,12 +65,12 @@ end
 -- @param line: 0-based line number
 -- @param next_line: text to insert as new line
 function M.accept_next_line(line, next_line)
-  local bufnr = vim.api.nvim_get_current_buf()
   M.clear()
+  local bufnr = vim.api.nvim_get_current_buf()
   -- Get all lines after current line
   local existing_lines = vim.api.nvim_buf_get_lines(bufnr, line + 1, -1, false)
   -- Insert new line and shift existing lines down
-  vim.api.nvim_buf_set_lines(bufnr, line + 1, line + 1, false, {next_line})
+  vim.api.nvim_buf_set_lines(bufnr, line + 1, line + 1, false, { next_line })
   vim.api.nvim_buf_set_lines(bufnr, line + 2, line + 2, false, existing_lines)
   -- Move cursor to end of accepted line
   vim.schedule(function()

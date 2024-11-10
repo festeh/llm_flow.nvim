@@ -141,21 +141,13 @@ function M.setup()
   })
 end
 
-local function get_virtual_text_after_cursor()
+local function get_virtual_text_after_cursor(lines)
   if not M.suggestion then return "" end
-  local cursor = vim.api.nvim_win_get_cursor(0)
-  local cursor_line = cursor[1] - 1
-  -- Check if suggestion is still valid for current cursor line
-  if cursor_line ~= M.suggestion.line then return "" end
-
-  local lines = vim.split(M.suggestion.content, "\n", { plain = true })
   local first_line = lines[1] or ""
   return first_line:sub(M.suggestion.pos + 1)
 end
 
 function M.accept_line()
-  -- Check if there's a suggestion and if it's still valid for the current cursor position
-  -- 1. If there's no suggestion, do nothing
   if not M.suggestion then
     return
   end
@@ -164,8 +156,7 @@ function M.accept_line()
   local content = M.suggestion.content
   local lines = vim.split(content, "\n", { plain = true })
 
-
-  local virtual_text = get_virtual_text_after_cursor()
+  local virtual_text = get_virtual_text_after_cursor(lines)
   if virtual_text == "" and #lines > 1 then
     -- Accept the next line instead
     local next_line = lines[2]
