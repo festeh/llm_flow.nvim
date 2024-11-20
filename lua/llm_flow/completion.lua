@@ -14,6 +14,7 @@ local M = {
 
 local function stop_timer_and_cancel()
   ui.clear()
+  M.req_id = nil
   if M.timer then
     M.timer:stop()
     M.timer:close()
@@ -27,7 +28,7 @@ local function stop_timer_and_cancel()
         client.notify('cancel_predict_editor', { id = req_id })
       end
     end
-    print("\n-\n")
+    l.log("\n-\n")
   end
 end
 
@@ -136,6 +137,13 @@ function M.setup()
     callback = timed_request
   })
 
+  vim.api.nvim_create_autocmd('InsertCharPre', {
+    group = group,
+    callback = function()
+      stop_timer_and_cancel()
+    end,
+  })
+
   vim.api.nvim_create_autocmd('TextChangedI', {
     group = group,
     callback = function()
@@ -178,6 +186,8 @@ function M.accept_line()
       ui.accept_text(line, pos, lines[1])
     end
   end
+
+  M.suggestion = nil
 
   M.timer = uv.new_timer()
   M.timer:start(kDebounce, 0, timed_request)

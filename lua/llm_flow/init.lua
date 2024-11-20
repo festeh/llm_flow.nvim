@@ -1,4 +1,6 @@
 local utils = require('llm_flow.utils')
+local completion = require('llm_flow.completion')
+
 local lsp = vim.lsp
 local api = vim.api
 
@@ -103,7 +105,8 @@ M.setup = function()
   --     lsp.stop_client(client_id)
   --   end,
   -- })
-
+  --
+  completion.setup()
   return true
 end
 
