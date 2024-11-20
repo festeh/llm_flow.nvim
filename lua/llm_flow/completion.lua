@@ -1,5 +1,6 @@
 local ui = require("llm_flow.ui")
 local uv = vim.uv
+local l = require("llm_flow.logger")
 
 
 local kDebounce = 100 -- ms
@@ -22,7 +23,7 @@ local function stop_timer_and_cancel()
   if client then
     for req_id, req in pairs(client.requests) do
       if req.type == "pending" then
-        print(req_id, "pending")
+        l.log(req_id, "pending")
         client.notify('cancel_predict_editor', { id = req_id })
       end
     end
@@ -51,7 +52,7 @@ local function on_predict_complete(err, result, line, pos)
   end
 
   if M.req_id ~= result.id then
-    print("rejected", "expected", M.req_id, "got", result.id)
+    l.log("rejected", "expected", M.req_id, "got", result.id)
     return
   end
 
@@ -75,14 +76,10 @@ local function on_predict_complete(err, result, line, pos)
   end
   local final_content = table.concat(truncated_content, "\n")
   ui.set_text(line, pos, final_content)
-  print(result.id, "completed")
+  l.log(result.id, "completed")
   return result
 end
 
-
-
-
---- Send a prediction request using the specified model
 --- @param params table The parameters for the prediction
 function M.predict_editor(params)
   local client = M.find_lsp_client()
