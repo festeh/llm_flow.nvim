@@ -7,7 +7,8 @@ local kDebounce = 100 -- ms
 local M = {
   suggestion = nil,
   timer = nil,
-  client = nil
+  client = nil,
+  req_id = nil,
 }
 
 local function stop_timer_and_cancel()
@@ -19,8 +20,11 @@ local function stop_timer_and_cancel()
   end
   local client = M.client
   if client then
-    for req_id, _ in pairs(client.requests) do
-      client.notify('cancel_predict_editor', { id = req_id })
+    for req_id, req in pairs(client.requests) do
+      if req.type == "pending" then
+        print(req_id, "pending")
+        client.notify('cancel_predict_editor', { id = req_id })
+      end
     end
   end
 end
@@ -46,6 +50,11 @@ local function on_predict_complete(err, result, line, pos)
     return
   end
 
+  if M.req_id ~= result.id then
+    print("rejected", "expected", M.req_id, "got", result.id)
+    return
+  end
+
   local content = result.content
   M.suggestion = {
     content = content,
@@ -66,6 +75,7 @@ local function on_predict_complete(err, result, line, pos)
   end
   local final_content = table.concat(truncated_content, "\n")
   ui.set_text(line, pos, final_content)
+  print(result.id, "completed")
   return result
 end
 
@@ -97,11 +107,11 @@ function M.predict_editor(params)
   local status, req_id = client.request("predict_editor", request_params, function(err, result)
     on_predict_complete(err, result, line, pos)
   end)
+  M.req_id = req_id
 end
 
 local function timed_request()
   vim.schedule_wrap(function()
-    stop_timer_and_cancel()
     M.predict_editor()
   end
   )()
