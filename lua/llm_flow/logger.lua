@@ -12,10 +12,12 @@ local function get_timestamp()
 end
 
 function M.log(...)
-  local args = { ... }
-  local timestamp = get_timestamp()
-  local message = table.concat(args, " ")
-  print(timestamp .. "> " .. message)
+  if vim.g.debug == 1 then
+    local args = { ... }
+    local timestamp = get_timestamp()
+    local message = table.concat(args, " ")
+    print(timestamp .. "> " .. message)
+  end
 end
 
 return M
