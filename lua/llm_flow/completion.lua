@@ -27,6 +27,7 @@ local function stop_timer_and_cancel()
         client.notify('cancel_predict_editor', { id = req_id })
       end
     end
+    print("\n-\n")
   end
 end
 
@@ -105,6 +106,7 @@ function M.predict_editor(params)
     on_predict_complete(err, result, line, pos)
   end)
   M.req_id = req_id
+  l.log("Sent request", req_id)
 end
 
 local function timed_request()
