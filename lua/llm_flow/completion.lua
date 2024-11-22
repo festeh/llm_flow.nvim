@@ -98,7 +98,8 @@ function M.predict_editor(params)
   local pos = cursor[2]
 
   local request_params = vim.tbl_extend("force", params, {
-    providerAndModel = "codestral/codestral-latest",
+    provider = "huggingface",
+    model = "codellama/CodeLlama-13b-hf",
     uri = vim.uri_from_bufnr(bufnr),
     line = line,
     pos = pos
