@@ -99,7 +99,7 @@ function M.predict_editor(params)
 
   local request_params = vim.tbl_extend("force", params, {
     provider = "huggingface",
-    model = "codellama/CodeLlama-13b-hf",
+    model = "codellama/CodeLlama-7b-hf",
     uri = vim.uri_from_bufnr(bufnr),
     line = line,
     pos = pos

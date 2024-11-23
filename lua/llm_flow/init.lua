@@ -1,5 +1,7 @@
 local utils = require('llm_flow.utils')
 local completion = require('llm_flow.completion')
+local Client = require('llm_flow.client')
+local config = require('llm_flow.config')
 
 local lsp = vim.lsp
 local api = vim.api
@@ -37,30 +39,17 @@ end
 
 M.setup = function()
   ensure_install()
-  local host = "0.0.0.0"
-  local port = 7777
-  local cmd = lsp.rpc.connect(host, port)
-
-  local server_name = "llm-flow"
-
-  local client_id = lsp.start_client({
-    name = server_name,
-    cmd = cmd,
-    cmd_env = {},
-    root_dir = vim.fs.dirname(vim.fs.find({ ".git" }, { upward = true })[1]),
-  })
+  local client_id = Client.start()
   if client_id == nil then
-    vim.notify("[LLM] Error starting llm-flow", vim.log.levels.ERROR)
+    vim.notify('Failed to start llm_flow language server', vim.log.levels.ERROR)
     return false
   end
-
-  local supported_extensions = { "c", "lua", "py", "js", "ts", "go", "svelte", "rs", "json", "md", "toml" }
 
   -- Send didOpen for current buffer if it matches
   local current_buf = vim.api.nvim_get_current_buf()
   local bufname = vim.api.nvim_buf_get_name(current_buf)
   local is_supported = false
-  for _, ext in ipairs(supported_extensions) do
+  for _, ext in ipairs(config.extensions) do
     if bufname:match("%." .. ext .. "$") then
       is_supported = true
       break
@@ -70,7 +59,7 @@ M.setup = function()
     lsp.buf_attach_client(current_buf, client_id)
     local uri = vim.uri_from_bufnr(current_buf)
     local text = table.concat(vim.api.nvim_buf_get_lines(current_buf, 0, -1, false), '\n')
-    local client = lsp.get_client_by_id(client_id)
+    local client = Client.get()
     if client == nil then
       return
     end
@@ -84,8 +73,8 @@ M.setup = function()
     })
   end
 
-  local extension_pattern = "*." .. table.concat(supported_extensions, ",*.")
-  local augroup = server_name
+  local extension_pattern = "*." .. table.concat(config.extensions, ",*.")
+  local augroup = "llm-flow"
   api.nvim_create_augroup(augroup, { clear = true })
   api.nvim_create_autocmd("BufEnter", {
     group = augroup,
