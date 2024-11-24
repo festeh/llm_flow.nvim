@@ -210,7 +210,7 @@ function M.accept_word()
       local words = vim.split(first_line, " ", { plain = true })
       local first_word = words[1]
       if first_word then
-        ui.accept_text(M.line, M.pos, first_word)
+        ui.accept_text(M.suggestion.line, M.suggestion.pos, first_word)
         stop_timer_and_cancel()
         M.timer = uv.new_timer()
         M.timer:start(kDebounce, 0, timed_request)
