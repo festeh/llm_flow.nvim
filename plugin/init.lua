@@ -12,14 +12,24 @@ vim.api.nvim_create_user_command('LLMRun', function(opts)
     end
   end
 
-  -- Get module and function from first two args
+  -- Get module, function and table string
   local module_name = args[1]
   local func_name = args[2]
-
-  -- Get remaining args as a table
-  local func_args = {}
-  for i = 3, #args do
-    table.insert(func_args, args[i])
+  local table_str = args[3] or "{}"
+  
+  -- Parse table string safely
+  local func_args
+  local ok, parsed = pcall(loadstring("return " .. table_str))
+  if not ok then
+    print("Error parsing table argument:", parsed)
+    return
+  end
+  func_args = parsed()
+  
+  -- Validate parsed result is a table
+  if type(func_args) ~= "table" then
+    print("Error: Third argument must be a table string, got:", type(func_args))
+    return
   end
 
   -- Require module and call function
