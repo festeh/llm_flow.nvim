@@ -12,44 +12,30 @@ vim.api.nvim_create_user_command('LLMRun', function(opts)
     end
   end
 
-  -- Get module and function from args
+  -- Get module and function from first two args
   local module_name = args[1]
   local func_name = args[2]
-  local open_buf = args[3]
+  
+  -- Get remaining args as a table
+  local func_args = {}
+  for i = 3, #args do
+    table.insert(func_args, args[i])
+  end
 
   -- Require module and call function
   local ok, module = pcall(require, module_name)
   if not ok then
     print("Error loading module:", module)
+    return
   end
 
   local func = module[func_name]
   if not func then
-    -- print("Function " .. func_name .. " not found in module " .. module_name)
-    print("Err: bad args")
-    print(vim.inspect(arg))
-    print(func_name)
-    print(module_name)
+    print("Error: Function '" .. func_name .. "' not found in module '" .. module_name .. "'")
     return
   end
 
-  -- Capture both return value and printed output
-  local output = ""
-  -- local function capture_print(...)
-  --   local args = { ... }
-  --   local str = ""
-  --   for i, v in ipairs(args) do
-  --     if i > 1 then str = str .. "\t" end
-  --     str = str .. tostring(v)
-  --   end
-  --   output = output .. str .. "\n"
-  -- end
-  --
-  -- -- Replace print with our capturing function
-  -- local old_print = print
-  -- print = capture_print
-
-  local ok, result = pcall(func)
+  local ok, result = pcall(func, func_args)
 
   -- Restore original print
   -- print = old_print
