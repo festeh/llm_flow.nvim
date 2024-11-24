@@ -6,7 +6,7 @@ local client_id = nil
 
 local M = {}
 
-M.start = function(config)
+M.start = function(opts)
   local host = "0.0.0.0"
   local port = 7777
   local cmd = lsp.rpc.connect(host, port)
