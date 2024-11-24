@@ -15,7 +15,7 @@ vim.api.nvim_create_user_command('LLMRun', function(opts)
   -- Get module and function from first two args
   local module_name = args[1]
   local func_name = args[2]
-  
+
   -- Get remaining args as a table
   local func_args = {}
   for i = 3, #args do
