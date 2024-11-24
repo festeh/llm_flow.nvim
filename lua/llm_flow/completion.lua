@@ -137,6 +137,10 @@ function M.setup()
     M.accept_word()
   end, { noremap = true, silent = true })
 
+  vim.keymap.set('i', '<C-j>', function()
+    M.accept_all()
+  end, { noremap = true, silent = true })
+
   -- Create separate autocommands for insert mode events
   vim.api.nvim_create_autocmd('InsertEnter', {
     group = group,
@@ -213,6 +217,22 @@ function M.accept_word()
       end
     end
   end
+end
+
+function M.accept_all()
+  if not M.suggestion then
+    return
+  end
+  stop_timer_and_cancel()
+  local line = M.suggestion.line
+  local pos = M.suggestion.pos
+  local content = M.suggestion.content
+  
+  ui.accept_text(line, pos, content)
+  M.suggestion = nil
+
+  M.timer = uv.new_timer()
+  M.timer:start(kDebounce, 0, timed_request)
 end
 
 function M.desetup()
