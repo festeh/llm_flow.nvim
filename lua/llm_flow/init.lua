@@ -80,7 +80,10 @@ local function init_client(client_id)
   notify_set_config(client)
 end
 
-M.setup = function()
+M.setup = function(opts)
+  if opts then
+    config.update(opts)
+  end
   ensure_install()
   local client_id = Client.start()
   if client_id == nil then

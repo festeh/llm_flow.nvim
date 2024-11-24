@@ -6,7 +6,7 @@ local M = {
 }
 
 M.update = function(opts)
-  vim.table.deep_extend("force", M, opts)
+  return vim.tbl_deep_extend("force", M, opts)
 end
 
 return M
