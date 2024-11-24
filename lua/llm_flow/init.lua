@@ -86,7 +86,7 @@ M.setup = function(opts)
     config.update(opts)
   end
   ensure_install()
-  local client_id = Client.start()
+  local client_id = Client.start(config)
   if client_id == nil then
     vim.notify('Failed to start llm_flow language server', vim.log.levels.ERROR)
     return false

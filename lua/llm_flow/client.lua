@@ -1,3 +1,5 @@
+local utils = require("llm_flow.utils")
+
 local lsp = vim.lsp
 
 local client = nil
@@ -17,26 +19,26 @@ end
 
 -- Spawn server process
 local function spawn_server(port)
-  local cmd = "lsp-server"
+  local cmd = ut
   local args = { "--port", tostring(port) }
-  
+
   local handle
-  handle = vim.loop.spawn(cmd, {
-    args = args,
-    detached = true
-  },
-  function(code)
-    handle:close()
-    if code ~= 0 then
-      vim.notify("[LLM] Server process exited with code: " .. code, vim.log.levels.ERROR)
-    end
-  end)
-  
+  handle = vim.uv.spawn(cmd, {
+      args = args,
+      detached = true
+    },
+    function(code)
+      handle:close()
+      if code ~= 0 then
+        vim.notify("[LLM] Server process exited with code: " .. code, vim.log.levels.ERROR)
+      end
+    end)
+
   if not handle then
     vim.notify("[LLM] Failed to spawn server process", vim.log.levels.ERROR)
     return nil
   end
-  
+
   return handle
 end
 
@@ -44,10 +46,10 @@ M.start = function(opts)
   opts = opts or {}
   local host = "127.0.0.1"
   local port
-  
+
   if opts.debug then
     -- Debug mode - connect to existing server
-    host = "0.0.0.0" 
+    host = "0.0.0.0"
     port = 7777
   else
     -- Production mode - spawn new server
@@ -56,8 +58,6 @@ M.start = function(opts)
     if not server_proc then
       return nil
     end
-    -- Give server time to start
-    vim.loop.sleep(1000)
   end
 
   local cmd = lsp.rpc.connect(host, port)
