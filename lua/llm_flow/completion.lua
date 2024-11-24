@@ -227,7 +227,7 @@ function M.accept_all()
   local line = M.suggestion.line
   local pos = M.suggestion.pos
   local content = M.suggestion.content
-  
+
   ui.accept_text(line, pos, content)
   M.suggestion = nil
 
