@@ -16,16 +16,14 @@ vim.api.nvim_create_user_command('LLMRun', function(opts)
   local module_name = args[1]
   local func_name = args[2]
   local table_str = args[3] or "{}"
-  
+
   -- Parse table string safely
-  local func_args
-  local ok, parsed = pcall(loadstring("return " .. table_str))
+  local ok, func_args = pcall(loadstring("return " .. table_str))
   if not ok then
     print("Error parsing table argument:", parsed)
     return
   end
-  func_args = parsed()
-  
+
   -- Validate parsed result is a table
   if type(func_args) ~= "table" then
     print("Error: Third argument must be a table string, got:", type(func_args))

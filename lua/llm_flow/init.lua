@@ -81,6 +81,7 @@ local function init_client(client_id)
 end
 
 M.setup = function(opts)
+  print("opts: " .. vim.inspect(opts))
   if opts then
     config.update(opts)
   end
