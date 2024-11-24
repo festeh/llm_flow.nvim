@@ -1,4 +1,5 @@
 local M = {
+  debug = false,
   provider = "huggingface",
   model = "codellama/CodeLlama-7b-hf",
   extensions = { "c", "lua", "py", "js", "ts", "go", "svelte", "rs", "json", "md", "toml" },
