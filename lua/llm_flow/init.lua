@@ -35,7 +35,50 @@ local function ensure_install()
   end
 end
 
+local function is_supported(current_buf)
+  local bufname = vim.api.nvim_buf_get_name(current_buf)
+  for _, ext in ipairs(config.extensions) do
+    if bufname:match("%." .. ext .. "$") then
+      return true
+    end
+  end
+  return false
+end
 
+local function notify_did_open(client, buf)
+  local text = table.concat(vim.api.nvim_buf_get_lines(buf, 0, -1, false), '\n')
+  client.notify('textDocument/didOpen', {
+    textDocument = {
+      uri = vim.uri_from_bufnr(buf),
+      languageId = vim.bo[buf].filetype,
+      version = 0,
+      text = text
+    }
+  })
+end
+
+local function notify_set_config(client)
+  client.notify('set_config', {
+    provider = config.provider,
+    model = config.model
+  })
+end
+
+
+local function init_client(client_id)
+  -- Send didOpen for current buffer if it matches
+  local current_buf = vim.api.nvim_get_current_buf()
+  if not is_supported(current_buf) then
+    return
+  end
+  lsp.buf_attach_client(current_buf, client_id)
+  local client = Client.get()
+  if client == nil then
+    return
+  end
+  notify_did_open(client, current_buf)
+  notify_set_config(client)
+end
 
 M.setup = function()
   ensure_install()
@@ -45,33 +88,7 @@ M.setup = function()
     return false
   end
 
-  -- Send didOpen for current buffer if it matches
-  local current_buf = vim.api.nvim_get_current_buf()
-  local bufname = vim.api.nvim_buf_get_name(current_buf)
-  local is_supported = false
-  for _, ext in ipairs(config.extensions) do
-    if bufname:match("%." .. ext .. "$") then
-      is_supported = true
-      break
-    end
-  end
-  if is_supported then
-    lsp.buf_attach_client(current_buf, client_id)
-    local uri = vim.uri_from_bufnr(current_buf)
-    local text = table.concat(vim.api.nvim_buf_get_lines(current_buf, 0, -1, false), '\n')
-    local client = Client.get()
-    if client == nil then
-      return
-    end
-    client.notify('textDocument/didOpen', {
-      textDocument = {
-        uri = uri,
-        languageId = vim.bo[current_buf].filetype,
-        version = 0,
-        text = text
-      }
-    })
-  end
+  init_client(client_id)
 
   local extension_pattern = "*." .. table.concat(config.extensions, ",*.")
   local augroup = "llm-flow"

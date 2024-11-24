@@ -1,6 +1,6 @@
 local M = {
   provider = "huggingface",
-  model = "",
+  model = "codellama/CodeLlama-7b-hf",
   extensions = { "c", "lua", "py", "js", "ts", "go", "svelte", "rs", "json", "md", "toml" },
 }
 
