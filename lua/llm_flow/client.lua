@@ -1,6 +1,7 @@
 local utils = require("llm_flow.utils")
 
 local lsp = vim.lsp
+local uv = vim.uv
 
 local client = nil
 local client_id = nil
@@ -17,21 +18,26 @@ local function get_random_port()
   return port
 end
 
+
 -- Spawn server process
 local function spawn_server(port)
-  local cmd = ut
+  local stdin = uv.new_pipe()
+  local stdout = uv.new_pipe()
+  local stderr = uv.new_pipe()
+  local cmd = utils.executable_path
   local args = { "--port", tostring(port) }
 
   local handle
-  handle = vim.uv.spawn(cmd, {
+  handle = uv.spawn(cmd, {
       args = args,
-      detached = true
+      detached = true,
+      stdio = { stdin, stdout, stderr }
     },
     function(code)
       handle:close()
-      if code ~= 0 then
-        vim.notify("[LLM] Server process exited with code: " .. code, vim.log.levels.ERROR)
-      end
+      -- if code ~= 0 then
+      vim.notify("[LLM] Server process exited with code: " .. code, vim.log.levels.ERROR)
+      -- end
     end)
 
   if not handle then
@@ -39,8 +45,29 @@ local function spawn_server(port)
     return nil
   end
 
+  uv.read_start(stdout, function(err, data)
+    if vim.g.debug == 1 then
+      if data then
+        print("stdout chunk", stdout, data)
+      else
+        print("stdout end", stdout)
+      end
+    end
+  end)
+
+  uv.read_start(stderr, function(err, data)
+    if vim.g.debug == 1 then
+      if data then
+        print("stderr chunk", stderr, data)
+      else
+        print("stderr end", stderr)
+      end
+    end
+  end)
+
   return handle
 end
+
 
 M.start = function(opts)
   opts = opts or {}
@@ -60,6 +87,7 @@ M.start = function(opts)
     end
   end
 
+  uv.sleep(1000)
   local cmd = lsp.rpc.connect(host, port)
   local server_name = "llm-flow"
 
