@@ -1,4 +1,5 @@
 local utils = require("llm_flow.utils")
+local l = require("llm_flow.logger")
 
 local lsp = vim.lsp
 local uv = vim.uv
@@ -70,6 +71,7 @@ end
 
 
 M.start = function(opts)
+  l.log("Got opts", vim.inspect(opts))
   opts = opts or {}
   local host = "127.0.0.1"
   local port

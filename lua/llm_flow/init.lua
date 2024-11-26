@@ -77,9 +77,8 @@ local function init_client(client_id)
 end
 
 M.setup = function(opts)
-  print("opts: " .. vim.inspect(opts))
   if opts then
-    config.update(opts)
+    config = config.update(opts)
   end
   ensure_install()
   local client_id = Client.start(config)

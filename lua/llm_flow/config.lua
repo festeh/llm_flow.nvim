@@ -1,3 +1,5 @@
+local l = require("llm_flow.logger")
+
 local M = {
   debug = false,
   provider = "huggingface",
@@ -7,6 +9,7 @@ local M = {
 }
 
 M.update = function(opts)
+  l.log("Updating config", vim.inspect(opts))
   return vim.tbl_deep_extend("force", M, opts)
 end
 
