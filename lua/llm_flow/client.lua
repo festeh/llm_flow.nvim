@@ -84,12 +84,12 @@ M.start = function(opts)
     -- Production mode - spawn new server
     port = get_random_port()
     server_proc = spawn_server(port)
+    uv.sleep(1000)
     if not server_proc then
       return nil
     end
   end
 
-  uv.sleep(1000)
   local cmd = lsp.rpc.connect(host, port)
   local server_name = "llm-flow"
 

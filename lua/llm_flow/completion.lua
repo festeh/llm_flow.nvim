@@ -2,7 +2,6 @@ local ui = require("llm_flow.ui")
 local uv = vim.uv
 local l = require("llm_flow.logger")
 
-
 local kDebounce = 100 -- ms
 
 local M = {
