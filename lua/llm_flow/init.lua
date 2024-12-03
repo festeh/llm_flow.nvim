@@ -56,7 +56,8 @@ end
 local function notify_set_config(client)
   client.notify('set_config', {
     provider = config.provider,
-    model = config.model
+    model = config.model,
+    repo = vim.fn.getcwd()
   })
 end
 
